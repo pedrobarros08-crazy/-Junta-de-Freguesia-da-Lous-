@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestão de Reparações de Frota</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: auto; }
+        .form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .full-width { grid-column: span 2; }
+        
+        .btn-gravar { background-color: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 15px; width: 100%; transition: 0.3s; }
+        .btn-gravar:hover { background-color: #2980b9; }
+        .btn-voltar { background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-top: 20px; transition: 0.3s; width: 100%; }
+        .btn-voltar:hover { background-color: #5a6268; }
+        .btn-limpar { background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: 0.3s; }
+        .btn-limpar:hover { background-color: #c82333; }
+
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #333; color: white; }
+        tr:hover { background-color: #f9f9f9; }
+        .header-tabela { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+        
+        .error-message { color: #dc3545; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ✅ Mensagem de erro -->
+    <div id="errorMessage" class="error-message"></div>
+
+    <div class="form-container">
+        <h2>Novo Registo de Reparação</h2>
+        <form id="reparacaoForm" action="gravar_viaturas.php" method="POST">
+            <div class="grid-form">
+                <div>
+                    <label>Viatura:</label>
+                    <select id="cars" name="id_viatura" required>
+                        <option value="">Selecione...</option>
+                        <option value="1">Toyota Dyna 06-53-SM</option>
+                        <option value="2">Toyota Dyna 96-98-II</option>
+                        <option value="3">Mitsubishi 92-DU-20</option>
+                        <option value="4">Opel 01-77-LR</option>
+                        <option value="5">Hyundai 98-66-ST</option>
+                        <option value="6">Renault Clio 42-BH-11</option>
+                        <option value="7">Renault Kangoo 33-BJ-10</option>
+                        <option value="8">Trator Deutz</option>
+                        <option value="9">Dumper Astel</option>
+                        <option value="10">Retroescavadora Case</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Data:</label>
+                    <input type="date" id="data" name="data" required>
+                </div>
+                <div class="full-width">
+                    <label>O que foi feito?</label>
+                    <input type="text" id="tipoTrabalho" name="trabalho" placeholder="Ex: Mudança de óleo" required>
+                </div>
+                <div>
+                    <label>Fornecedor:</label>
+                    <input type="text" id="nomeFornecedor" name="fornecedor" required>
+                </div>
+                <div>
+                    <label>Custo (€):</label>
+                    <input type="number" id="preco" name="preco" step="0.01" min="0" required>
+                </div>
+                <div>
+                    <label>Kms Atuais:</label>
+                    <input type="number" id="kms" name="kms" min="0" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-gravar">Gravar Reparação</button>
+        </form>
+    </div>
+
+    <div class="header-tabela">
+        <h2>Histórico de Manutenções</h2>
+        <button onclick="limparReparacoes()" class="btn-limpar">Limpar Tudo</button>
+    </div>
+    
+    <table id="tabelaReparacoes">
+        <thead>
+            <tr>
+                <th>Viatura</th>
+                <th>Data</th>
+                <th>Trabalho</th>
+                <th>Fornecedor</th>
+                <th>Kms</th>
+                <th>Custo</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button onclick="window.location.href='index.html'" class="btn-voltar">Voltar ao Menu</button>
+</div>
+
+<script>
+    const form = document.getElementById('reparacaoForm');
+    const corpoTabela = document.querySelector('#tabelaReparacoes tbody');
+    const errorDiv = document.getElementById('errorMessage');
+
+    window.onload = function() {
+        carregarReparacoes();
+        // ✅ Definir data de hoje por padrão
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('data').value = today;
+    };
+
+    // ✅ Validação no cliente antes de enviar para o backend
+    form.addEventListener('submit', function(event) {
+        errorDiv.style.display = 'none';
+
+        const viatura = document.getElementById('cars').value;
+        const data = document.getElementById('data').value;
+        const trabalho = document.getElementById('tipoTrabalho').value;
+        const fornecedor = document.getElementById('nomeFornecedor').value;
+        const kms = document.getElementById('kms').value;
+        const preco = document.getElementById('preco').value;
+
+        // Validações no cliente
+        if (!viatura) {
+            event.preventDefault();
+            mostrarErro("Seleciona uma viatura!");
+            return;
+        }
+        if (!data) {
+            event.preventDefault();
+            mostrarErro("Seleciona uma data!");
+            return;
+        }
+        if (!trabalho || trabalho.trim().length === 0) {
+            event.preventDefault();
+            mostrarErro("Descreve o trabalho realizado!");
+            return;
+        }
+        if (!fornecedor || fornecedor.trim().length === 0) {
+            event.preventDefault();
+            mostrarErro("Indica o fornecedor!");
+            return;
+        }
+        if (!kms || kms <= 0) {
+            event.preventDefault();
+            mostrarErro("Indica uma quilometragem válida!");
+            return;
+        }
+        if (!preco || preco < 0) {
+            event.preventDefault();
+            mostrarErro("Indica um preço válido!");
+            return;
+        }
+
+        // ✅ Se validação passar, também guarda em localStorage (backup local)
+        const novaReparacao = {
+            viatura: document.querySelector('#cars option:checked').text,
+            data: data,
+            trabalho: trabalho,
+            fornecedor: fornecedor,
+            kms: kms,
+            preco: preco
+        };
+
+        const historico = JSON.parse(localStorage.getItem('minhasReparacoes')) || [];
+        historico.push(novaReparacao);
+        localStorage.setItem('minhasReparacoes', JSON.stringify(historico));
+
+        adicionarLinhaATabela(novaReparacao);
+        // Deixar o form submeter para o backend
+    });
+
+    function adicionarLinhaATabela(item) {
+        const linha = corpoTabela.insertRow();
+        linha.insertCell(0).innerText = item.viatura;
+        const dataFormatada = new Date(item.data).toLocaleDateString('pt-PT');
+        linha.insertCell(1).innerText = dataFormatada;
+        linha.insertCell(2).innerText = item.trabalho;
+        linha.insertCell(3).innerText = item.fornecedor;
+        linha.insertCell(4).innerText = Number(item.kms).toLocaleString('pt-PT') + " km";
+        linha.insertCell(5).innerText = Number(item.preco).toFixed(2) + " €";
+    }
+
+    function carregarReparacoes() {
+        const historico = JSON.parse(localStorage.getItem('minhasReparacoes')) || [];
+        corpoTabela.innerHTML = "";
+        historico.forEach(adicionarLinhaATabela);
+    }
+
+    function limparReparacoes() {
+        if(confirm("Deseja apagar todo o histórico de reparações?")) {
+            localStorage.removeItem('minhasReparacoes');
+            carregarReparacoes();
+        }
+    }
+
+    function mostrarErro(mensagem) {
+        errorDiv.innerText = mensagem;
+        errorDiv.style.display = 'block';
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 5000);
+    }
+</script>
+
+</body>
+</html>

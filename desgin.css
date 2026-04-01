@@ -1,0 +1,19 @@
+/* Localiza isto no <style> do signin.php */
+button { 
+    background-color: #2ecc71; /* Verde igual ao trabalhos.php */
+    color: white; 
+    border: none; 
+    padding: 12px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-size: 16px; 
+    margin-top: 20px; 
+    width: 100%; 
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s; 
+}
+
+button:hover { 
+    background-color: #27ae60; /* Verde mais escuro */
+    transform: translateY(-2px); /* Pequeno efeito de subir, como no menu */
+}

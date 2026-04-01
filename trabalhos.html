@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Registo de Trabalhos</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+        .container { background: white; padding: 20px; border-radius: 8px; max-width: 900px; margin: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        label { font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; }
+        select, input[type="text"], input[type="date"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        
+        .btn-gravar { background-color: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; width: 100%; transition: 0.3s; }
+        .btn-gravar:hover { background-color: #27ae60; }
+        
+        .btn-voltar { background-color: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; display: block; width: 100%; text-align: center; text-decoration: none; box-sizing: border-box; transition: 0.3s; }
+        .btn-voltar:hover { background-color: #7f8c8d; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #2c3e50; color: white; }
+        tr:hover { background-color: #f9f9f9; }
+        
+        .error-message { color: #dc3545; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none; }
+        .success-message { color: #155724; background-color: #d4edda; padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Registo Diário de Trabalhos</h2>
+    
+    <!-- ✅ Mensagens de erro/sucesso -->
+    <div id="errorMessage" class="error-message"></div>
+    <div id="successMessage" class="success-message"></div>
+    
+    <form action="gravar_trabalho.php" method="POST" id="meuFormulario">
+        <label>Localidade:</label>
+        <select id="trabalho" name="localidade" onchange="atualizarRuas()" required>
+            <option value="">Selecione a localidade</option>
+            <option value="Alfocheira">Alfocheira</option>
+            <option value="Bairro dos Carvalhos">Bairro dos Carvalhos</option>
+            <option value="Cabeço do Moiro">Cabeço do Moiro</option>
+            <option value="Cabo do Soito">Cabo do Soito</option>
+            <option value="Cacilhas">Cacilhas</option>
+            <option value="Casal dos Rios">Casal dos Rios</option>
+            <option value="Ceira dos Vales">Ceira dos Vales</option>
+            <option value="Cornaga">Cornaga</option>
+            <option value="Cova da Areia">Cova da Areia</option>
+            <option value="Cova do Lobo">Cova do Lobo</option>
+            <option value="Eira de Calva">Eira de Calva</option>
+            <option value="Fornea">Fornea</option>
+            <option value="Lousã">Lousã</option>
+            <option value="Meiral">Meiral</option>
+            <option value="Padrão">Padrão</option>
+            <option value="Pegos">Pegos</option>
+            <option value="Penedo">Penedo</option>
+            <option value="Poças">Poças</option>
+            <option value="Porto da Pedra">Porto da Pedra</option>
+            <option value="Póvoa da Lousã">Póvoa da Lousã</option>
+            <option value="Ramalhais">Ramalhais</option>
+            <option value="Vale de Maceira">Vale de Maceira</option>
+            <option value="Vale Domingos">Vale Domingos</option>
+            <option value="Vale Neira">Vale Neira</option>
+            <option value="Vale Nogueira">Vale Nogueira</option>
+            <option value="Vale Pereira do Areal">Vale Pereira do Areal</option>
+        </select>
+
+        <label>Rua:</label>
+        <select id="rua" name="id_rua" required>
+            <option value="">Selecione primeiro a localidade</option>
+        </select>
+
+        <label>Data:</label>
+        <input type="date" id="data" name="data" value="" required>
+
+        <label>O que foi feito? (Tipo de Trabalho):</label>
+        <input type="text" id="tipoTrabalho" name="descricao" placeholder="Escreve aqui o trabalho realizado..." required>
+
+        <button type="submit" class="btn-gravar">Gravar Trabalho</button>
+    </form>
+
+    <h3 style="margin-top: 30px;">Histórico Geral de Trabalhos</h3>
+    <table id="tabelaTrabalhos">
+        <thead>
+            <tr>
+                <th>Localidade</th>
+                <th>Rua</th>
+                <th>Data</th>
+                <th>Trabalho Realizado</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    
+    <button type="button" class="btn-voltar" onclick="window.location.href='index.html'">Voltar ao Menu Principal</button>
+</div>
+
+<script src="trabalhos.js"></script>
+
+</body>
+</html>
