@@ -3,10 +3,12 @@ include 'config.php';
 
 // 1. Procurar as Ruas para o formulário
 $sql_ruas = "SELECT id, nome_rua, localidade FROM ruas ORDER BY localidade, nome_rua";
-$res_ruas = $conn->query($sql_ruas);
+$res_ruas = sqlsrv_query($conn, $sql_ruas);
 $ruas_db = [];
-while($row = $res_ruas->fetch_assoc()){
-    $ruas_db[$row['localidade']][] = $row;
+if ($res_ruas !== false) {
+    while ($row = sqlsrv_fetch_array($res_ruas, SQLSRV_FETCH_ASSOC)) {
+        $ruas_db[$row['localidade']][] = $row;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -31,8 +33,8 @@ while($row = $res_ruas->fetch_assoc()){
         <label>Localidade:</label>
         <select name="localidade" id="localidade" onchange="atualizarRuas()" required>
             <option value="">Selecione...</option>
-            <?php foreach(array_keys($ruas_db) as $loc): ?>
-                <option value="<?php echo $loc; ?>"><?php echo $loc; ?></option>
+            <?php foreach (array_keys($ruas_db) as $loc): ?>
+                <option value="<?php echo htmlspecialchars($loc); ?>"><?php echo htmlspecialchars($loc); ?></option>
             <?php endforeach; ?>
         </select>
 
@@ -57,10 +59,23 @@ while($row = $res_ruas->fetch_assoc()){
         </thead>
         <tbody>
             <?php
-            $sql_h = "SELECT h.*, r.nome_rua, r.localidade FROM historico_trabalhos h JOIN ruas r ON h.id_rua = r.id ORDER BY h.data_trabalho DESC";
-            $res_h = $conn->query($sql_h);
-            while($h = $res_h->fetch_assoc()) {
-                echo "<tr><td>{$h['localidade']}</td><td>{$h['nome_rua']}</td><td>".date('d/m/Y', strtotime($h['data_trabalho']))."</td><td>{$h['descricao_servico']}</td></tr>";
+            $sql_h = "SELECT h.id, h.data_trabalho, h.descricao_servico, r.nome_rua, r.localidade
+                      FROM historico_trabalhos h
+                      JOIN ruas r ON h.id_rua = r.id
+                      ORDER BY h.data_trabalho DESC";
+            $res_h = sqlsrv_query($conn, $sql_h);
+            if ($res_h !== false) {
+                while ($h = sqlsrv_fetch_array($res_h, SQLSRV_FETCH_ASSOC)) {
+                    $data = $h['data_trabalho'] instanceof DateTime
+                        ? $h['data_trabalho']->format('d/m/Y')
+                        : date('d/m/Y', strtotime($h['data_trabalho']));
+                    echo "<tr>"
+                        . "<td>" . htmlspecialchars($h['localidade']) . "</td>"
+                        . "<td>" . htmlspecialchars($h['nome_rua']) . "</td>"
+                        . "<td>" . htmlspecialchars($data) . "</td>"
+                        . "<td>" . htmlspecialchars($h['descricao_servico']) . "</td>"
+                        . "</tr>";
+                }
             }
             ?>
         </tbody>

@@ -1,45 +1,63 @@
 <?php
-include 'config.php';  // ✅ Mudado de config_viaturas.php para config.php
+include 'config.php';
 
-// ✅ Validação de dados
-$id_rua = isset($_POST['id_rua']) ? intval($_POST['id_rua']) : 0;
-$descricao = isset($_POST['descricao']) ? trim($_POST['descricao']) : '';
-$data = isset($_POST['data']) ? $_POST['data'] : date('Y-m-d');
-
-// ✅ Verificar se data é válida
-if (!strtotime($data)) {
-    die("Data inválida.");
+// ✅ Validação do ID da rua (parâmetro GET)
+if (!isset($_GET['id_rua']) || empty($_GET['id_rua']) || !is_numeric($_GET['id_rua'])) {
+    die("Erro: ID de rua inválido.");
 }
 
-// ✅ Verificar campos obrigatórios
-if ($id_rua <= 0) {
-    die("Rua não selecionada.");
+$id_rua = intval($_GET['id_rua']);
+
+// ✅ Prepared Statement com SQLSRV para evitar SQL Injection
+$sql    = "SELECT h.id, h.data_trabalho, h.descricao_servico, r.nome_rua, r.localidade
+           FROM historico_trabalhos h
+           JOIN ruas r ON h.id_rua = r.id
+           WHERE h.id_rua = ?
+           ORDER BY h.data_trabalho DESC";
+$params = array($id_rua);
+$stmt   = sqlsrv_prepare($conn, $sql, $params);
+
+if ($stmt === false) {
+    $errors = sqlsrv_errors();
+    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
+    die("Erro na preparação da query: " . htmlspecialchars($msg));
 }
 
-if (empty($descricao)) {
-    die("Descrição do trabalho obrigatória.");
+if (!sqlsrv_execute($stmt)) {
+    $errors = sqlsrv_errors();
+    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
+    die("Erro ao executar a query: " . htmlspecialchars($msg));
 }
 
-if (strlen($descricao) > 500) {
-    die("Descrição muito longa (máximo 500 caracteres).");
+echo "<table style='border-collapse: collapse; width: 100%;'>
+        <tr style='background-color: #333; color: white;'>
+            <th style='padding: 10px; border: 1px solid #ddd;'>Localidade</th>
+            <th style='padding: 10px; border: 1px solid #ddd;'>Rua</th>
+            <th style='padding: 10px; border: 1px solid #ddd;'>Data</th>
+            <th style='padding: 10px; border: 1px solid #ddd;'>Descrição</th>
+        </tr>";
+
+$temRegistos = false;
+while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+    $temRegistos = true;
+    $data = $row['data_trabalho'] instanceof DateTime
+        ? $row['data_trabalho']->format('d/m/Y')
+        : date('d/m/Y', strtotime($row['data_trabalho']));
+    // ✅ Output escaping (proteção contra XSS)
+    echo "<tr style='border-bottom: 1px solid #ddd;'>
+            <td style='padding: 10px;'>" . htmlspecialchars($row['localidade']) . "</td>
+            <td style='padding: 10px;'>" . htmlspecialchars($row['nome_rua']) . "</td>
+            <td style='padding: 10px;'>" . htmlspecialchars($data) . "</td>
+            <td style='padding: 10px;'>" . htmlspecialchars($row['descricao_servico']) . "</td>
+          </tr>";
 }
 
-// ✅ Prepared statement para evitar SQL Injection
-$stmt = $conn->prepare("INSERT INTO historico_trabalhos (id_rua, data_trabalho, descricao_servico) 
-                       VALUES (?, ?, ?)");
-
-if (!$stmt) {
-    die("Erro na preparação da query: " . $conn->error);
+if (!$temRegistos) {
+    echo "<tr><td colspan='4' style='padding: 10px; text-align: center;'>Sem registos de trabalho.</td></tr>";
 }
 
-$stmt->bind_param("iss", $id_rua, $data, $descricao);
+echo "</table>";
 
-if ($stmt->execute()) {
-    echo "<script>alert('Trabalho registado com sucesso!'); window.location.href='trabalhos.php';</script>";
-} else {
-    echo "Erro ao guardar: " . $stmt->error;
-}
-
-$stmt->close();
-$conn->close();
+sqlsrv_free_stmt($stmt);
+sqlsrv_close($conn);
 ?>
