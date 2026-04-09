@@ -8,16 +8,22 @@ if (!isset($_GET['id']) || empty($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $id_escolhido = intval($_GET['id']);
 
-// ✅ Prepared Statement
-$stmt = $conn->prepare("SELECT * FROM manutencoes WHERE id_viatura = ? ORDER BY data_servico DESC");
+// ✅ Prepared Statement com SQLSRV
+$sql    = "SELECT * FROM manutencoes WHERE id_viatura = ? ORDER BY data_servico DESC";
+$params = array($id_escolhido);
+$stmt   = sqlsrv_prepare($conn, $sql, $params);
 
-if (!$stmt) {
-    die("Erro na preparação da query: " . $conn->error);
+if ($stmt === false) {
+    $errors = sqlsrv_errors();
+    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
+    die("Erro na preparação da query: " . htmlspecialchars($msg));
 }
 
-$stmt->bind_param("i", $id_escolhido);
-$stmt->execute();
-$result = $stmt->get_result();
+if (!sqlsrv_execute($stmt)) {
+    $errors = sqlsrv_errors();
+    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
+    die("Erro ao executar a query: " . htmlspecialchars($msg));
+}
 
 echo "<table style='border-collapse: collapse; width: 100%;'>
         <tr style='background-color: #333; color: white;'>
@@ -28,23 +34,28 @@ echo "<table style='border-collapse: collapse; width: 100%;'>
             <th style='padding: 10px; border: 1px solid #ddd;'>Custo</th>
         </tr>";
 
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        // ✅ Output escaping (proteção contra XSS)
-        echo "<tr style='border-bottom: 1px solid #ddd;'>
-                <td style='padding: 10px;'>" . htmlspecialchars($row['data_servico']) . "</td>
-                <td style='padding: 10px;'>" . htmlspecialchars($row['descricao']) . "</td>
-                <td style='padding: 10px;'>" . htmlspecialchars($row['fornecedor']) . "</td>
-                <td style='padding: 10px;'>" . htmlspecialchars($row['kms']) . " km</td>
-                <td style='padding: 10px;'>" . htmlspecialchars(number_format($row['custo'], 2, ',', '.')) . " €</td>
-              </tr>";
-    }
-} else {
+$temRegistos = false;
+while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+    $temRegistos = true;
+    $data = $row['data_servico'] instanceof DateTime
+        ? $row['data_servico']->format('d/m/Y')
+        : date('d/m/Y', strtotime($row['data_servico']));
+    // ✅ Output escaping (proteção contra XSS)
+    echo "<tr style='border-bottom: 1px solid #ddd;'>
+            <td style='padding: 10px;'>" . htmlspecialchars($data) . "</td>
+            <td style='padding: 10px;'>" . htmlspecialchars($row['descricao']) . "</td>
+            <td style='padding: 10px;'>" . htmlspecialchars($row['fornecedor']) . "</td>
+            <td style='padding: 10px;'>" . htmlspecialchars($row['kms']) . " km</td>
+            <td style='padding: 10px;'>" . htmlspecialchars(number_format($row['custo'], 2, ',', '.')) . " €</td>
+          </tr>";
+}
+
+if (!$temRegistos) {
     echo "<tr><td colspan='5' style='padding: 10px; text-align: center;'>Sem registos de manutenção.</td></tr>";
 }
 
 echo "</table>";
 
-$stmt->close();
-$conn->close();
+sqlsrv_free_stmt($stmt);
+sqlsrv_close($conn);
 ?>

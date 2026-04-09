@@ -1,13 +1,24 @@
 <?php
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db = "gestao_junta";
+require_once __DIR__ . '/loader.env.php';
 
-$conn = new mysqli($host, $user, $pass, $db);
-$conn->set_charset('utf8mb4');
+$serverName = getenv('DB_SERVER');
+if (!$serverName) {
+    die("Erro: variável de ambiente DB_SERVER não configurada. Consulte o ficheiro .env.example.");
+}
 
-if ($conn->connect_error) {
-    die("Erro na ligação: " . $conn->connect_error);
+$connectionOptions = array(
+    "Database"     => getenv('DB_NAME') ?: '',
+    "Uid"          => getenv('DB_USER') ?: '',
+    "PWD"          => getenv('DB_PASSWORD') ?: '',
+    "CharacterSet" => getenv('DB_CHARSET') ?: 'UTF-8',
+);
+
+$conn = sqlsrv_connect($serverName, $connectionOptions);
+
+if ($conn === false) {
+    $errors = sqlsrv_errors();
+    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
+    die("Erro na ligação à base de dados: " . htmlspecialchars($msg));
 }
 ?>
+

@@ -8,22 +8,28 @@ if (!$id) {
     die("Erro: ID inválido");
 }
 
-// ✅ Prepared Statement
-$stmt = $conn->prepare("SELECT * FROM historico_trabalhos WHERE id = ?");
+// ✅ Prepared Statement com SQLSRV
+$sql    = "SELECT * FROM historico_trabalhos WHERE id = ?";
+$params = array($id);
+$stmt   = sqlsrv_prepare($conn, $sql, $params);
 
-if (!$stmt) {
-    die("Erro na preparação da query: " . $conn->error);
+if ($stmt === false) {
+    $errors = sqlsrv_errors();
+    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
+    die("Erro na preparação da query: " . htmlspecialchars($msg));
 }
 
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
+if (!sqlsrv_execute($stmt)) {
+    $errors = sqlsrv_errors();
+    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
+    die("Erro ao executar a query: " . htmlspecialchars($msg));
+}
 
 // ✅ Output escaping (proteção contra XSS)
-while($row = $result->fetch_assoc()) {
+while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     echo htmlspecialchars($row['descricao_servico']) . "<br>";
 }
 
-$stmt->close();
-$conn->close();
+sqlsrv_free_stmt($stmt);
+sqlsrv_close($conn);
 ?>

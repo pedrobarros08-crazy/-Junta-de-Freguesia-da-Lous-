@@ -29,24 +29,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $kms        = intval($_POST['kms']);
     $custo      = floatval($_POST['preco']);
 
-    // ✅ Prepared Statement (Proteção contra SQL Injection)
-    $stmt = $conn->prepare("INSERT INTO manutencoes (id_viatura, data_servico, descricao, fornecedor, kms, custo) 
-                           VALUES (?, ?, ?, ?, ?, ?)");
-    
-    if (!$stmt) {
-        die("Erro na preparação da query: " . $conn->error);
+    // ✅ Prepared Statement com SQLSRV (Proteção contra SQL Injection)
+    $sql    = "INSERT INTO manutencoes (id_viatura, data_servico, descricao, fornecedor, kms, custo)
+               VALUES (?, ?, ?, ?, ?, ?)";
+    $params = array($id_viatura, $data, $descricao, $fornecedor, $kms, $custo);
+    $stmt   = sqlsrv_prepare($conn, $sql, $params);
+
+    if ($stmt === false) {
+        $errors = sqlsrv_errors();
+        $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
+        die("Erro na preparação da query: " . htmlspecialchars($msg));
     }
 
-    $stmt->bind_param("isssid", $id_viatura, $data, $descricao, $fornecedor, $kms, $custo);
-
-    if ($stmt->execute()) {
+    if (sqlsrv_execute($stmt)) {
         echo "<script>alert('Reparação gravada com sucesso!'); window.location.href='signin.php';</script>";
     } else {
-        echo "Erro ao gravar: " . $stmt->error;
+        $errors = sqlsrv_errors();
+        $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
+        echo "Erro ao gravar: " . htmlspecialchars($msg);
     }
 
-    $stmt->close();
+    sqlsrv_free_stmt($stmt);
 }
 
-$conn->close();
+sqlsrv_close($conn);
 ?>
