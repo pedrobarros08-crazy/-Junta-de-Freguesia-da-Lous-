@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . '/loader.env.php';
 
+// Verificar se a extensão SQLSRV está carregada
+if (!extension_loaded('sqlsrv')) {
+    die("Erro: A extensão SQLSRV não está instalada. Consulte o README.md para instruções de instalação.");
+}
+
 $serverName = getenv('DB_SERVER');
 if (!$serverName) {
     die("Erro: variável de ambiente DB_SERVER não configurada. Consulte o ficheiro .env.example.");

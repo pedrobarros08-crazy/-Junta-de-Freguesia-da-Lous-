@@ -1,7 +1,8 @@
 -- Limpa a tabela antes de inserir para evitar duplicados (opcional)
-TRUNCATE TABLE ruas;
+-- TRUNCATE TABLE ruas;
 
--- Inserção de todas as ruas e localidades do teu ficheiro trabalhos.js
+-- Inserção de todas as ruas e localidades
+-- Nota: A tabela ruas deve ser criada primeiro via historico_trabalhos.sql
 INSERT INTO ruas (nome_rua, localidade) VALUES 
 ('Estrada da Castanheira - Parque Alfocheira', 'Alfocheira'),
 ('Rua do Lameiro', 'Alfocheira'),
@@ -57,24 +58,24 @@ INSERT INTO ruas (nome_rua, localidade) VALUES
 ('Rua de Favela', 'Favela'),
 ('Rua do Olival', 'Favela'),
 ('Rua Principal de Favela', 'Favela'),
-('Bairro da Quinta de Santo António', 'Lousã'),
-('Beco de Vale de Milho', 'Lousã'),
-('Caminho de Santa Rita', 'Lousã'),
-('Estrada da Lousã', 'Lousã'),
-('Largo de Santa Rita', 'Lousã'),
-('Praceta de Santa Rita', 'Lousã'),
-('Rua Dr. Germano de Vasconcelos', 'Lousã'),
-('Rua Marquês de Pombal', 'Lousã'),
-('Beco da Amieira', 'Póvoa de Fiscal'),
-('Caminho da Amieira', 'Póvoa de Fiscal'),
-('Rua da Amieira', 'Póvoa de Fiscal'),
-('Rua de Santo António', 'Póvoa de Fiscal'),
-('Rua do Fiscal', 'Póvoa de Fiscal'),
-('Rua Principal de Póvoa de Fiscal', 'Póvoa de Fiscal'),
-('Rua da Capela', 'Prilhão'),
-('Rua de Prilhão', 'Prilhão'),
-('Rua do Vale', 'Prilhão'),
-('Rua Principal de Prilhão', 'Prilhão'),
+('Bairro da Quinta de Santo António', N'Lousã'),
+('Beco de Vale de Milho', N'Lousã'),
+('Caminho de Santa Rita', N'Lousã'),
+('Estrada da Lousã', N'Lousã'),
+('Largo de Santa Rita', N'Lousã'),
+('Praceta de Santa Rita', N'Lousã'),
+('Rua Dr. Germano de Vasconcelos', N'Lousã'),
+('Rua Marquês de Pombal', N'Lousã'),
+('Beco da Amieira', N'Póvoa de Fiscal'),
+('Caminho da Amieira', N'Póvoa de Fiscal'),
+('Rua da Amieira', N'Póvoa de Fiscal'),
+('Rua de Santo António', N'Póvoa de Fiscal'),
+('Rua do Fiscal', N'Póvoa de Fiscal'),
+('Rua Principal de Póvoa de Fiscal', N'Póvoa de Fiscal'),
+('Rua da Capela', N'Prilhão'),
+('Rua de Prilhão', N'Prilhão'),
+('Rua do Vale', N'Prilhão'),
+('Rua Principal de Prilhão', N'Prilhão'),
 ('Rua de Reguengo', 'Reguengo'),
 ('Rua do Vale', 'Reguengo'),
 ('Rua Principal de Reguengo', 'Reguengo'),
