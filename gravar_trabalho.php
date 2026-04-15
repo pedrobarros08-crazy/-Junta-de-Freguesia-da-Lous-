@@ -5,19 +5,27 @@ include 'config.php';
 if (!isset($_POST['id_rua']) || empty($_POST['id_rua']) || !is_numeric($_POST['id_rua'])) {
     die("Erro: Rua não selecionada.");
 }
-if (!isset($_POST['data']) || empty($_POST['data']) || !strtotime($_POST['data'])) {
-    die("Erro: Data inválida.");
+if (!isset($_POST['data']) || empty($_POST['data'])) {
+    die("Erro: Data obrigatória.");
 }
-if (!isset($_POST['descricao']) || empty($_POST['descricao'])) {
+
+// ✅ Validação robusta de data para SQL Server (formato yyyy-mm-dd)
+$data_input = trim($_POST['data']);
+$data_obj = DateTime::createFromFormat('Y-m-d', $data_input);
+if (!$data_obj || $data_obj->format('Y-m-d') !== $data_input) {
+    die("Erro: Data inválida. Use o formato aaaa-mm-dd.");
+}
+$data = $data_obj->format('Y-m-d');
+
+if (!isset($_POST['descricao']) || empty(trim($_POST['descricao']))) {
     die("Erro: Descrição do trabalho obrigatória.");
 }
 
 $id_rua = intval($_POST['id_rua']);
-$data   = $_POST['data'];
 $desc   = trim($_POST['descricao']);
 
 // ✅ Validação de comprimento
-if (strlen($desc) > 500) {
+if (mb_strlen($desc, 'UTF-8') > 500) {
     die("Erro: Descrição muito longa (máximo 500 caracteres).");
 }
 
