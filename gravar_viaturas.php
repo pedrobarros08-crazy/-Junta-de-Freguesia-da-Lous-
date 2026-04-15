@@ -38,10 +38,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $custo      = floatval($_POST['preco']);
 
     // ✅ Validação de comprimento de strings
-    if (strlen($descricao) > 500) {
+    if (mb_strlen($descricao, 'UTF-8') > 500) {
         die("Erro: Descrição muito longa (máximo 500 caracteres).");
     }
-    if (strlen($fornecedor) > 100) {
+    if (mb_strlen($fornecedor, 'UTF-8') > 100) {
         die("Erro: Nome do fornecedor muito longo (máximo 100 caracteres).");
     }
 

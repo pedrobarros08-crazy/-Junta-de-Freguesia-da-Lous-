@@ -25,7 +25,7 @@ $id_rua = intval($_POST['id_rua']);
 $desc   = trim($_POST['descricao']);
 
 // ✅ Validação de comprimento
-if (strlen($desc) > 500) {
+if (mb_strlen($desc, 'UTF-8') > 500) {
     die("Erro: Descrição muito longa (máximo 500 caracteres).");
 }
 
