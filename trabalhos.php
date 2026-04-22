@@ -24,6 +24,7 @@ $tipos_trabalho = [
 ];
 
 $status = isset($_GET['status']) ? $_GET['status'] : '';
+$status = in_array($status, ['success', 'error'], true) ? $status : '';
 $message = isset($_GET['message']) ? $_GET['message'] : '';
 ?>
 <!DOCTYPE html>
@@ -86,7 +87,7 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
         </select>
 
         <label>Observações:</label>
-        <input type="text" name="descricao" placeholder="Escreve aqui o trabalho realizado..." maxlength="500">
+        <input type="text" name="descricao" placeholder="Escreve aqui o trabalho realizado...">
 
         <button type="submit" class="btn-gravar">Gravar Trabalho</button>
     </form>

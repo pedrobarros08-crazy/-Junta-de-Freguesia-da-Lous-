@@ -2,6 +2,7 @@
 include 'config.php';
 
 function redirect_with_message($status, $message) {
+    $status = in_array($status, ['success', 'error'], true) ? $status : 'error';
     header('Location: trabalhos.php?status=' . urlencode($status) . '&message=' . urlencode($message));
     exit;
 }
@@ -57,17 +58,13 @@ $params = array($id_rua, $data, $desc);
 $stmt   = sqlsrv_prepare($conn, $sql, $params);
 
 if ($stmt === false) {
-    $errors = sqlsrv_errors();
-    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
-    redirect_with_message('error', 'Erro na preparação da query: ' . $msg);
+    redirect_with_message('error', 'Erro interno ao processar o pedido.');
 }
 
 if (sqlsrv_execute($stmt)) {
     redirect_with_message('success', 'Trabalho registado com sucesso!');
 } else {
-    $errors = sqlsrv_errors();
-    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
-    redirect_with_message('error', 'Erro ao guardar: ' . $msg);
+    redirect_with_message('error', 'Erro ao guardar o trabalho.');
 }
 
 sqlsrv_free_stmt($stmt);
