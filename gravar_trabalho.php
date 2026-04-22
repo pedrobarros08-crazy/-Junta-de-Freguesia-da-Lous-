@@ -16,7 +16,7 @@ $tipos_trabalho = [
     'LBT' => 'Limpeza de Bermas com trator',
     'CRP' => 'Construção/Reparação de passeios',
     'CRMS' => 'Construção/Reparação de muros de suporte',
-    'Outros' => 'Outros'
+    'OUTROS' => 'Outros'
 ];
 
 $mapa_localidades = [
@@ -97,14 +97,18 @@ sqlsrv_free_stmt($stmt_rua);
 if (!$rua) {
     redirect_with_message('error', 'Erro: Rua inválida.');
 }
-if ((string)$rua['localidade'] !== $localidade) {
+if ($rua['localidade'] !== $localidade) {
     redirect_with_message('error', 'Erro: Rua não pertence à localidade selecionada.');
 }
 
 $tabela = $mapa_localidades[$localidade];
-$nome_rua = (string)$rua['nome_rua'];
+if (!preg_match('/^[a-z0-9_]+$/', $tabela)) {
+    redirect_with_message('error', 'Erro: Tabela de localidade inválida.');
+}
+$tabela_sql = '[' . $tabela . ']';
+$nome_rua = $rua['nome_rua'];
 
-$sql    = "INSERT INTO {$tabela} (nome_rua, data_trabalho, tipo_trabalho, observacoes) VALUES (?, ?, ?, ?)";
+$sql    = "INSERT INTO {$tabela_sql} (nome_rua, data_trabalho, tipo_trabalho, observacoes) VALUES (?, ?, ?, ?)";
 $params = array($nome_rua, $data, $tipo_trabalho, $observacoes);
 $stmt   = sqlsrv_prepare($conn, $sql, $params);
 

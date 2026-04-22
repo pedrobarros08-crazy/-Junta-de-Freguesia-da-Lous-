@@ -36,8 +36,13 @@ if (!isset($mapa_viaturas[$id_viatura_hist])) {
 $historico = [];
 if ($id_viatura_hist > 0) {
     $tabela = $mapa_viaturas[$id_viatura_hist];
-    $sql_hist = "SELECT id, data_servico, descricao, fornecedor, kms, custo FROM {$tabela} ORDER BY data_servico DESC, id DESC";
-    $res_hist = sqlsrv_query($conn, $sql_hist);
+    if (preg_match('/^[a-z0-9_]+$/', $tabela)) {
+        $tabela_sql = '[' . $tabela . ']';
+        $sql_hist = "SELECT id, data_servico, descricao, fornecedor, kms, custo FROM {$tabela_sql} ORDER BY data_servico DESC, id DESC";
+    } else {
+        $sql_hist = null;
+    }
+    $res_hist = $sql_hist !== null ? sqlsrv_query($conn, $sql_hist) : false;
     if ($res_hist !== false) {
         while ($row = sqlsrv_fetch_array($res_hist, SQLSRV_FETCH_ASSOC)) {
             $historico[] = $row;

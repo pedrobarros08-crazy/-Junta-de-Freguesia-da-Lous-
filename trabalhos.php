@@ -50,7 +50,7 @@ $tipos_trabalho = [
     'LBT' => 'Limpeza de Bermas com trator',
     'CRP' => 'Construção/Reparação de passeios',
     'CRMS' => 'Construção/Reparação de muros de suporte',
-    'Outros' => 'Outros'
+    'OUTROS' => 'Outros'
 ];
 
 $localidades = array_keys($ruas_db);
@@ -65,8 +65,13 @@ if (!isset($mapa_localidades[$localidade_selecionada])) {
 $historico = [];
 if ($localidade_selecionada !== '') {
     $tabela_historico = $mapa_localidades[$localidade_selecionada];
-    $sql_h = "SELECT nome_rua, data_trabalho, tipo_trabalho, observacoes FROM {$tabela_historico} ORDER BY data_trabalho DESC, id DESC";
-    $res_h = sqlsrv_query($conn, $sql_h);
+    if (preg_match('/^[a-z0-9_]+$/', $tabela_historico)) {
+        $tabela_historico_sql = '[' . $tabela_historico . ']';
+        $sql_h = "SELECT nome_rua, data_trabalho, tipo_trabalho, observacoes FROM {$tabela_historico_sql} ORDER BY data_trabalho DESC, id DESC";
+    } else {
+        $sql_h = null;
+    }
+    $res_h = $sql_h !== null ? sqlsrv_query($conn, $sql_h) : false;
     if ($res_h !== false) {
         while ($h = sqlsrv_fetch_array($res_h, SQLSRV_FETCH_ASSOC)) {
             $historico[] = $h;

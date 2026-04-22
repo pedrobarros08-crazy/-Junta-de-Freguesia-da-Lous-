@@ -64,7 +64,11 @@ if (mb_strlen($fornecedor, 'UTF-8') > 100) {
 }
 
 $tabela = $mapa_viaturas[$id_viatura];
-$sql    = "INSERT INTO {$tabela} (data_servico, descricao, fornecedor, kms, custo) VALUES (?, ?, ?, ?, ?)";
+if (!preg_match('/^[a-z0-9_]+$/', $tabela)) {
+    die("Erro: Tabela de manutenção inválida.");
+}
+$tabela_sql = '[' . $tabela . ']';
+$sql    = "INSERT INTO {$tabela_sql} (data_servico, descricao, fornecedor, kms, custo) VALUES (?, ?, ?, ?, ?)";
 $params = array($data, $descricao, $fornecedor, $kms, $custo);
 $stmt   = sqlsrv_prepare($conn, $sql, $params);
 
