@@ -10,6 +10,21 @@ if ($res_ruas !== false) {
         $ruas_db[$row['localidade']][] = $row;
     }
 }
+
+$tipos_trabalho = [
+    'LBV' => 'Limpeza de Bermas e Valetas',
+    'CM' => 'Colocação de manilhas',
+    'LA' => 'Limpeza Aqueduto',
+    'DA' => 'Desbaste de árvores',
+    'AH' => 'Aplicação de Herbicida',
+    'LBT' => 'Limpeza de Bermas com trator',
+    'CRP' => 'Construção/Reparação de passeios',
+    'CRMS' => 'Construção/Reparação de muros de suporte',
+    'OUTROS' => 'Outros'
+];
+
+$status = isset($_GET['status']) ? $_GET['status'] : '';
+$message = isset($_GET['message']) ? $_GET['message'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -17,22 +32,36 @@ if ($res_ruas !== false) {
     <meta charset="UTF-8">
     <title>Trabalhos - Junta de Freguesia</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
-        .container { background: white; padding: 20px; border-radius: 8px; max-width: 900px; margin: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        select, input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ccc; }
-        button { background: #2ecc71; color: white; border: none; cursor: pointer; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+        .container { background: white; padding: 20px; border-radius: 8px; max-width: 900px; margin: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        label { font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; }
+        select, input[type="text"], input[type="date"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-gravar { background-color: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; width: 100%; transition: 0.3s; }
+        .btn-gravar:hover { background-color: #27ae60; }
+        .btn-voltar { background-color: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; display: block; width: 100%; text-align: center; text-decoration: none; box-sizing: border-box; transition: 0.3s; }
+        .btn-voltar:hover { background-color: #7f8c8d; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        th { background: #eee; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #2c3e50; color: white; }
+        tbody tr:hover { background-color: #f9f9f9; }
+        .error-message { color: #dc3545; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none; }
+        .success-message { color: #155724; background-color: #d4edda; padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none; }
+        .error-message.show, .success-message.show { display: block; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>Registo de Trabalho</h2>
+    <h2>Registo Diário de Trabalhos</h2>
+    <div class="error-message<?php echo $status === 'error' ? ' show' : ''; ?>">
+        <?php echo $status === 'error' ? htmlspecialchars($message) : ''; ?>
+    </div>
+    <div class="success-message<?php echo $status === 'success' ? ' show' : ''; ?>">
+        <?php echo $status === 'success' ? htmlspecialchars($message) : ''; ?>
+    </div>
     <form action="gravar_trabalho.php" method="POST">
         <label>Localidade:</label>
         <select name="localidade" id="localidade" onchange="atualizarRuas()" required>
-            <option value="">Selecione...</option>
+            <option value="">Selecione a localidade</option>
             <?php foreach (array_keys($ruas_db) as $loc): ?>
                 <option value="<?php echo htmlspecialchars($loc); ?>"><?php echo htmlspecialchars($loc); ?></option>
             <?php endforeach; ?>
@@ -46,16 +75,26 @@ if ($res_ruas !== false) {
         <label>Data:</label>
         <input type="date" name="data" value="<?php echo date('Y-m-d'); ?>" required>
 
-        <label>Descrição:</label>
-        <input type="text" name="descricao" placeholder="O que foi feito?" required>
+        <label>O que foi feito? (Tipo de Trabalho):</label>
+        <select name="tipo_trabalho" required>
+            <option value="">Selecione o tipo de trabalho</option>
+            <?php foreach ($tipos_trabalho as $codigo => $tipo): ?>
+                <option value="<?php echo htmlspecialchars($codigo); ?>">
+                    <?php echo htmlspecialchars($tipo . ' (' . $codigo . ')'); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-        <button type="submit">Gravar Trabalho</button>
+        <label>Observações:</label>
+        <input type="text" name="descricao" placeholder="Escreve aqui o trabalho realizado..." maxlength="500">
+
+        <button type="submit" class="btn-gravar">Gravar Trabalho</button>
     </form>
 
-    <h3>Histórico de Intervenções</h3>
+    <h3 style="margin-top: 30px;">Histórico Geral de Trabalhos</h3>
     <table>
         <thead>
-            <tr><th>Localidade</th><th>Rua</th><th>Data</th><th>Descrição</th></tr>
+            <tr><th>Localidade</th><th>Rua</th><th>Data</th><th>Trabalho Realizado</th></tr>
         </thead>
         <tbody>
             <?php
@@ -80,7 +119,7 @@ if ($res_ruas !== false) {
             ?>
         </tbody>
     </table>
-    <button onclick="window.location.href='index.html'" style="background:#95a5a6;">Voltar</button>
+    <button type="button" class="btn-voltar" onclick="window.location.href='index.html'">Voltar ao Menu Principal</button>
 </div>
 
 <script>
