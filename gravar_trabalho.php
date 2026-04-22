@@ -16,10 +16,41 @@ $tipos_trabalho = [
     'LBT' => 'Limpeza de Bermas com trator',
     'CRP' => 'Construção/Reparação de passeios',
     'CRMS' => 'Construção/Reparação de muros de suporte',
-    'OUTROS' => 'Outros'
+    'Outros' => 'Outros'
 ];
 
-// ✅ Validação de entrada
+$mapa_localidades = [
+    'Alfocheira' => 'trabalhos_alfocheira',
+    'Bairro dos Carvalhos' => 'trabalhos_bairro_dos_carvalhos',
+    'Cabeço do Moiro' => 'trabalhos_cabeco_do_moiro',
+    'Cabo do Soito' => 'trabalhos_cabo_do_soito',
+    'Cacilhas' => 'trabalhos_cacilhas',
+    'Casal dos Rios' => 'trabalhos_casal_dos_rios',
+    'Ceira dos Vales' => 'trabalhos_ceira_dos_vales',
+    'Cornaga' => 'trabalhos_cornaga',
+    'Cova da Areia' => 'trabalhos_cova_da_areia',
+    'Cova do Lobo' => 'trabalhos_cova_do_lobo',
+    'Eira de Calva' => 'trabalhos_eira_de_calva',
+    'Fornea' => 'trabalhos_fornea',
+    'Lousã' => 'trabalhos_lousa',
+    'Meiral' => 'trabalhos_meiral',
+    'Padrão' => 'trabalhos_padrao',
+    'Pegos' => 'trabalhos_pegos',
+    'Penedo' => 'trabalhos_penedo',
+    'Poças' => 'trabalhos_pocas',
+    'Porto da Pedra' => 'trabalhos_porto_da_pedra',
+    'Póvoa da Lousã' => 'trabalhos_povoa_da_lousa',
+    'Ramalhais' => 'trabalhos_ramalhais',
+    'Vale de Maceira' => 'trabalhos_vale_de_maceira',
+    'Vale Domingos' => 'trabalhos_vale_domingos',
+    'Vale Neira' => 'trabalhos_vale_neira',
+    'Vale Nogueira' => 'trabalhos_vale_nogueira',
+    'Vale Pereira do Areal' => 'trabalhos_vale_pereira_do_areal'
+];
+
+if (!isset($_POST['localidade']) || empty(trim($_POST['localidade']))) {
+    redirect_with_message('error', 'Erro: Localidade não selecionada.');
+}
 if (!isset($_POST['id_rua']) || empty($_POST['id_rua']) || !is_numeric($_POST['id_rua'])) {
     redirect_with_message('error', 'Erro: Rua não selecionada.');
 }
@@ -28,6 +59,11 @@ if (!isset($_POST['data']) || empty($_POST['data'])) {
 }
 if (!isset($_POST['tipo_trabalho']) || empty(trim($_POST['tipo_trabalho']))) {
     redirect_with_message('error', 'Erro: Tipo de trabalho obrigatório.');
+}
+
+$localidade = trim($_POST['localidade']);
+if (!isset($mapa_localidades[$localidade])) {
+    redirect_with_message('error', 'Erro: Localidade inválida.');
 }
 
 $tipo_trabalho = trim($_POST['tipo_trabalho']);
@@ -44,17 +80,32 @@ if (!$data_obj || $data_obj->format('Y-m-d') !== $data_input) {
 $data = $data_obj->format('Y-m-d');
 
 $id_rua = intval($_POST['id_rua']);
-$obs    = isset($_POST['descricao']) ? trim($_POST['descricao']) : '';
-$desc   = $tipos_trabalho[$tipo_trabalho] . ($obs !== '' ? ' - ' . $obs : '');
+$observacoes = isset($_POST['descricao']) ? trim($_POST['descricao']) : '';
 
-// ✅ Validação de comprimento
-if (mb_strlen($desc, 'UTF-8') > 500) {
-    redirect_with_message('error', 'Erro: Descrição muito longa (máximo 500 caracteres).');
+if (mb_strlen($observacoes, 'UTF-8') > 1000) {
+    redirect_with_message('error', 'Erro: Observações muito longas (máximo 1000 caracteres).');
 }
 
-// ✅ Prepared Statement com SQLSRV (Proteção contra SQL Injection)
-$sql    = "INSERT INTO historico_trabalhos (id_rua, data_trabalho, descricao_servico) VALUES (?, ?, ?)";
-$params = array($id_rua, $data, $desc);
+$sql_rua = "SELECT nome_rua, localidade FROM ruas WHERE id = ?";
+$stmt_rua = sqlsrv_prepare($conn, $sql_rua, array($id_rua));
+if ($stmt_rua === false || !sqlsrv_execute($stmt_rua)) {
+    redirect_with_message('error', 'Erro ao validar a rua selecionada.');
+}
+$rua = sqlsrv_fetch_array($stmt_rua, SQLSRV_FETCH_ASSOC);
+sqlsrv_free_stmt($stmt_rua);
+
+if (!$rua) {
+    redirect_with_message('error', 'Erro: Rua inválida.');
+}
+if ((string)$rua['localidade'] !== $localidade) {
+    redirect_with_message('error', 'Erro: Rua não pertence à localidade selecionada.');
+}
+
+$tabela = $mapa_localidades[$localidade];
+$nome_rua = (string)$rua['nome_rua'];
+
+$sql    = "INSERT INTO {$tabela} (nome_rua, data_trabalho, tipo_trabalho, observacoes) VALUES (?, ?, ?, ?)";
+$params = array($nome_rua, $data, $tipo_trabalho, $observacoes);
 $stmt   = sqlsrv_prepare($conn, $sql, $params);
 
 if ($stmt === false) {

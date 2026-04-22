@@ -1,27 +1,47 @@
 <?php
 include 'config.php';
 
-// Carregar lista de viaturas da base de dados
-$sql_viaturas = "SELECT id, nome FROM viaturas ORDER BY nome";
+$mapa_viaturas = [
+    1  => 'manutencoes_toyota_dyna_06_53_sm',
+    2  => 'manutencoes_toyota_dyna_96_98_ii',
+    3  => 'manutencoes_mitsubishi_92_du_20',
+    4  => 'manutencoes_opel_01_77_lr',
+    5  => 'manutencoes_hyundai_98_66_st',
+    6  => 'manutencoes_renault_clio_42_bh_11',
+    7  => 'manutencoes_renault_kangoo_33_bj_10',
+    8  => 'manutencoes_trator_deutz',
+    9  => 'manutencoes_dumper_astel',
+    10 => 'manutencoes_retroescavadora_case'
+];
+
+$sql_viaturas = "SELECT id, nome FROM viaturas ORDER BY id";
 $res_viaturas = sqlsrv_query($conn, $sql_viaturas);
 $viaturas = [];
 if ($res_viaturas !== false) {
     while ($row = sqlsrv_fetch_array($res_viaturas, SQLSRV_FETCH_ASSOC)) {
-        $viaturas[] = $row;
+        if (isset($mapa_viaturas[(int)$row['id']])) {
+            $viaturas[] = $row;
+        }
     }
 }
 
-// Carregar histórico de manutenções da base de dados
-$sql_hist = "SELECT m.id, m.data_servico, m.descricao, m.fornecedor, m.kms, m.custo,
-                    v.nome AS nome_viatura
-             FROM manutencoes m
-             JOIN viaturas v ON m.id_viatura = v.id
-             ORDER BY m.data_servico DESC";
-$res_hist = sqlsrv_query($conn, $sql_hist);
+$id_viatura_hist = isset($_GET['id_viatura']) ? intval($_GET['id_viatura']) : 0;
+if ($id_viatura_hist === 0 && !empty($viaturas)) {
+    $id_viatura_hist = (int)$viaturas[0]['id'];
+}
+if (!isset($mapa_viaturas[$id_viatura_hist])) {
+    $id_viatura_hist = 0;
+}
+
 $historico = [];
-if ($res_hist !== false) {
-    while ($row = sqlsrv_fetch_array($res_hist, SQLSRV_FETCH_ASSOC)) {
-        $historico[] = $row;
+if ($id_viatura_hist > 0) {
+    $tabela = $mapa_viaturas[$id_viatura_hist];
+    $sql_hist = "SELECT id, data_servico, descricao, fornecedor, kms, custo FROM {$tabela} ORDER BY data_servico DESC, id DESC";
+    $res_hist = sqlsrv_query($conn, $sql_hist);
+    if ($res_hist !== false) {
+        while ($row = sqlsrv_fetch_array($res_hist, SQLSRV_FETCH_ASSOC)) {
+            $historico[] = $row;
+        }
     }
 }
 ?>
@@ -51,6 +71,8 @@ if ($res_hist !== false) {
         .header-tabela { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
 
         .error-message { color: #dc3545; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none; }
+        .filtro-historico { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 10px; }
+        .filtro-historico > div { flex: 1; }
     </style>
 </head>
 <body>
@@ -68,7 +90,7 @@ if ($res_hist !== false) {
                         <option value="">Selecione...</option>
                         <?php if (!empty($viaturas)): ?>
                             <?php foreach ($viaturas as $v): ?>
-                                <option value="<?php echo intval($v['id']); ?>"><?php echo htmlspecialchars($v['nome']); ?></option>
+                                <option value="<?php echo intval($v['id']); ?>"<?php echo ((int)$v['id'] === $id_viatura_hist) ? ' selected' : ''; ?>><?php echo htmlspecialchars($v['nome']); ?></option>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <option value="1">Toyota Dyna 06-53-SM</option>
@@ -113,10 +135,22 @@ if ($res_hist !== false) {
         <h2>Histórico de Manutenções</h2>
     </div>
 
+    <form method="GET" class="filtro-historico">
+        <div>
+            <label for="id_viatura_hist">Viatura do histórico:</label>
+            <select name="id_viatura" id="id_viatura_hist" required>
+                <option value="">Selecione...</option>
+                <?php foreach ($viaturas as $v): ?>
+                    <option value="<?php echo intval($v['id']); ?>"<?php echo ((int)$v['id'] === $id_viatura_hist) ? ' selected' : ''; ?>><?php echo htmlspecialchars($v['nome']); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <button type="submit" class="btn-gravar" style="width: 220px; margin-top: 0;">Ver Histórico</button>
+    </form>
+
     <table id="tabelaReparacoes">
         <thead>
             <tr>
-                <th>Viatura</th>
                 <th>Data</th>
                 <th>Trabalho</th>
                 <th>Fornecedor</th>
@@ -125,8 +159,10 @@ if ($res_hist !== false) {
             </tr>
         </thead>
         <tbody>
-            <?php if (empty($historico)): ?>
-                <tr><td colspan="6" style="text-align: center; padding: 20px;">Sem registos de manutenção.</td></tr>
+            <?php if ($id_viatura_hist === 0): ?>
+                <tr><td colspan="5" style="text-align: center; padding: 20px;">Selecione uma viatura para ver o histórico.</td></tr>
+            <?php elseif (empty($historico)): ?>
+                <tr><td colspan="5" style="text-align: center; padding: 20px;">Sem registos de manutenção.</td></tr>
             <?php else: ?>
                 <?php foreach ($historico as $h): ?>
                     <?php
@@ -135,12 +171,11 @@ if ($res_hist !== false) {
                         : date('d/m/Y', strtotime($h['data_servico']));
                     ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($h['nome_viatura']); ?></td>
                         <td><?php echo htmlspecialchars($data); ?></td>
                         <td><?php echo htmlspecialchars($h['descricao']); ?></td>
                         <td><?php echo htmlspecialchars($h['fornecedor']); ?></td>
-                        <td><?php echo htmlspecialchars(number_format($h['kms'], 0, ',', '.')) . ' km'; ?></td>
-                        <td><?php echo htmlspecialchars(number_format($h['custo'], 2, ',', '.')) . ' €'; ?></td>
+                        <td><?php echo htmlspecialchars(number_format((float)$h['kms'], 0, ',', '.')) . ' km'; ?></td>
+                        <td><?php echo htmlspecialchars(number_format((float)$h['custo'], 2, ',', '.')) . ' €'; ?></td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -164,12 +199,12 @@ if ($res_hist !== false) {
         const kms       = document.getElementById('kms').value;
         const preco     = document.getElementById('preco').value;
 
-        if (!viatura) { event.preventDefault(); mostrarErro("Seleciona uma viatura!"); return; }
-        if (!data)    { event.preventDefault(); mostrarErro("Seleciona uma data!"); return; }
-        if (!trabalho || trabalho.trim().length === 0) { event.preventDefault(); mostrarErro("Descreve o trabalho realizado!"); return; }
-        if (!fornecedor || fornecedor.trim().length === 0) { event.preventDefault(); mostrarErro("Indica o fornecedor!"); return; }
-        if (!kms || kms <= 0) { event.preventDefault(); mostrarErro("Indica uma quilometragem válida!"); return; }
-        if (!preco || preco < 0) { event.preventDefault(); mostrarErro("Indica um preço válido!"); return; }
+        if (!viatura) { event.preventDefault(); mostrarErro('Seleciona uma viatura!'); return; }
+        if (!data)    { event.preventDefault(); mostrarErro('Seleciona uma data!'); return; }
+        if (!trabalho || trabalho.trim().length === 0) { event.preventDefault(); mostrarErro('Descreve o trabalho realizado!'); return; }
+        if (!fornecedor || fornecedor.trim().length === 0) { event.preventDefault(); mostrarErro('Indica o fornecedor!'); return; }
+        if (!kms || kms <= 0) { event.preventDefault(); mostrarErro('Indica uma quilometragem válida!'); return; }
+        if (!preco || preco < 0) { event.preventDefault(); mostrarErro('Indica um preço válido!'); return; }
     });
 
     function mostrarErro(mensagem) {
