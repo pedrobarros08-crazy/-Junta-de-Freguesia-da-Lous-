@@ -39,7 +39,14 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
 
 $historico = [];
 if ($tabelaSelecionada !== '') {
-    $sql = "SELECT id, nome_rua, data_trabalho, tipo_trabalho, observacoes FROM $tabelaSelecionada ORDER BY data_trabalho DESC, id DESC";
+    if (!preg_match('/^[a-z0-9_]+$/', $tabelaSelecionada)) {
+        $tabelaSelecionada = '';
+    }
+}
+
+if ($tabelaSelecionada !== '') {
+    $tabelaEscapada = '[' . str_replace(']', ']]', $tabelaSelecionada) . ']';
+    $sql = "SELECT id, nome_rua, data_trabalho, tipo_trabalho, observacoes FROM $tabelaEscapada ORDER BY data_trabalho DESC, id DESC";
     $res = sqlsrv_query($conn, $sql);
     if ($res !== false) {
         while ($row = sqlsrv_fetch_array($res, SQLSRV_FETCH_ASSOC)) {

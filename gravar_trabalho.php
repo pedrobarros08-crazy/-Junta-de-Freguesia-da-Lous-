@@ -49,6 +49,10 @@ if (!isset($localidades[$localidade])) {
 }
 
 $tabela = $localidades[$localidade];
+if (!preg_match('/^[a-z0-9_]+$/', $tabela)) {
+    redirect_with_message($localidade, 'error', 'Tabela de localidade inválida.');
+}
+$tabelaEscapada = '[' . str_replace(']', ']]', $tabela) . ']';
 $nomeRua = isset($_POST['nome_rua']) ? trim($_POST['nome_rua']) : '';
 $dataInput = isset($_POST['data_trabalho']) ? trim($_POST['data_trabalho']) : '';
 $tipoTrabalho = isset($_POST['tipo_trabalho']) ? trim($_POST['tipo_trabalho']) : '';
@@ -67,7 +71,7 @@ if (mb_strlen($nomeRua, 'UTF-8') > 255 || mb_strlen($tipoTrabalho, 'UTF-8') > 25
     redirect_with_message($localidade, 'error', 'Um ou mais campos excedem o tamanho permitido.');
 }
 
-$sql = "INSERT INTO $tabela (nome_rua, data_trabalho, tipo_trabalho, observacoes) VALUES (?, ?, ?, ?)";
+$sql = "INSERT INTO $tabelaEscapada (nome_rua, data_trabalho, tipo_trabalho, observacoes) VALUES (?, ?, ?, ?)";
 $params = [$nomeRua, $dataInput, $tipoTrabalho, $observacoes];
 $stmt = sqlsrv_prepare($conn, $sql, $params);
 

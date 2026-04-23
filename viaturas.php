@@ -56,7 +56,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $tabela = $viaturaPost;
-    $sql = "INSERT INTO $tabela (data_servico, km, intervencao, valor, fornecedor) VALUES (?, ?, ?, ?, ?)";
+    if (!preg_match('/^[a-z0-9_]+$/', $tabela)) {
+        redirect_viatura($viaturaPost, 'error', 'Tabela de viatura inválida.');
+    }
+    $tabelaEscapada = '[' . str_replace(']', ']]', $tabela) . ']';
+    $sql = "INSERT INTO $tabelaEscapada (data_servico, km, intervencao, valor, fornecedor) VALUES (?, ?, ?, ?, ?)";
     $params = [$dataServico, (int)$km, $intervencao, (float)$valor, $fornecedor];
     $stmt = sqlsrv_prepare($conn, $sql, $params);
 
@@ -84,12 +88,19 @@ $taxaIva = 0.23;
 
 if ($viaturaValida) {
     $tabela = $viaturaSelecionada;
-    $sql = "SELECT id, data_servico, km, intervencao, valor, fornecedor FROM $tabela ORDER BY data_servico DESC, id DESC";
-    $res = sqlsrv_query($conn, $sql);
-    if ($res !== false) {
-        while ($row = sqlsrv_fetch_array($res, SQLSRV_FETCH_ASSOC)) {
-            $historico[] = $row;
-            $despesaTotal += (float) $row['valor'];
+    if (preg_match('/^[a-z0-9_]+$/', $tabela)) {
+        $tabelaEscapada = '[' . str_replace(']', ']]', $tabela) . ']';
+        $sql = "SELECT id, data_servico, km, intervencao, valor, fornecedor FROM $tabelaEscapada ORDER BY data_servico DESC, id DESC";
+    } else {
+        $sql = '';
+    }
+    if ($sql !== '') {
+        $res = sqlsrv_query($conn, $sql);
+        if ($res !== false) {
+            while ($row = sqlsrv_fetch_array($res, SQLSRV_FETCH_ASSOC)) {
+                $historico[] = $row;
+                $despesaTotal += (float) $row['valor'];
+            }
         }
     }
 }
