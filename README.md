@@ -33,12 +33,11 @@ Sistema de gestão de trabalhos e viaturas desenvolvido para a Junta de Freguesi
 No **SQL Server Management Studio**, execute os scripts SQL pela seguinte ordem:
 
 ```sql
--- 1. Criar as tabelas de ruas e trabalhos
--- Executar: gestao_junta.sql
--- Executar: historico_trabalhos.sql
+-- 1. Criar as tabelas de trabalhos (1 por localidade)
+-- Executar: criar_trabalhos_bd.sql
 
--- 2. Criar as tabelas de viaturas
--- Executar: viaturas.sql
+-- 2. Criar as tabelas de viaturas (1 por viatura)
+-- Executar: criar_viaturas_bd.sql
 ```
 
 ### 3. Configurar as Credenciais
@@ -86,9 +85,8 @@ gestao-junta/
 ├── ver_historico.php       # Histórico de trabalhos por rua
 ├── ver_historicoviaturas.php # Histórico de manutenções por viatura
 ├── ver_rua.php             # Detalhes de trabalho por ID
-├── gestao_junta.sql        # Script SQL - ruas e localidades
-├── historico_trabalhos.sql # Script SQL - tabela de trabalhos
-└── viaturas.sql            # Script SQL - viaturas e manutenções
+├── criar_trabalhos_bd.sql  # Script SQL - 26 tabelas de trabalhos (1 por localidade)
+└── criar_viaturas_bd.sql   # Script SQL - 11 tabelas de viaturas (1 por viatura)
 ```
 
 ---
