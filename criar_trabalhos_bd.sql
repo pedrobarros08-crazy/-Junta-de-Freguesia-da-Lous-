@@ -1,4 +1,4 @@
--- Estrutura de base de dados para Trabalhos e Viaturas (SQL Server)
+-- Estrutura de base de dados para Trabalhos (SQL Server)
 
 -- =========================
 -- Tabelas de Trabalhos
