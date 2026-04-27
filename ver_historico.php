@@ -1,21 +1,48 @@
 <?php
 include 'config.php';
 
-// ✅ Validação do ID da rua (parâmetro GET)
-if (!isset($_GET['id_rua']) || empty($_GET['id_rua']) || !is_numeric($_GET['id_rua'])) {
-    die("Erro: ID de rua inválido.");
+$localidades = [
+    'Alfocheira'           => 'trabalhos_alfocheira',
+    'Bairro dos Carvalhos' => 'trabalhos_bairro_dos_carvalhos',
+    'Cabeço do Moiro'      => 'trabalhos_cabeco_do_moiro',
+    'Cabo do Soito'        => 'trabalhos_cabo_do_soito',
+    'Cacilhas'             => 'trabalhos_cacilhas',
+    'Casal dos Rios'       => 'trabalhos_casal_dos_rios',
+    'Ceira dos Vales'      => 'trabalhos_ceira_dos_vales',
+    'Cornaga'              => 'trabalhos_cornaga',
+    'Cova da Areia'        => 'trabalhos_cova_da_areia',
+    'Cova do Lobo'         => 'trabalhos_cova_do_lobo',
+    'Eira de Calva'        => 'trabalhos_eira_de_calva',
+    'Fórnea'               => 'trabalhos_fornea',
+    'Lousã'                => 'trabalhos_lousa',
+    'Meiral'               => 'trabalhos_meiral',
+    'Padrão'               => 'trabalhos_padrao',
+    'Pegos'                => 'trabalhos_pegos',
+    'Penedo'               => 'trabalhos_penedo',
+    'Poças'                => 'trabalhos_pocas',
+    'Porto da Pedra'       => 'trabalhos_porto_da_pedra',
+    'Póvoa da Lousã'       => 'trabalhos_povoa_da_lousa',
+    'Ramalhais'            => 'trabalhos_ramalhais',
+    'Vale de Maceira'      => 'trabalhos_vale_de_maceira',
+    'Vale Domingos'        => 'trabalhos_vale_domingos',
+    'Vale Neira'           => 'trabalhos_vale_neira',
+    'Vale Nogueira'        => 'trabalhos_vale_nogueira',
+    'Vale Pereira do Areal'=> 'trabalhos_vale_pereira_do_areal',
+];
+
+$localidade = isset($_GET['localidade']) ? trim($_GET['localidade']) : '';
+if (!isset($localidades[$localidade])) {
+    die("Erro: Localidade inválida.");
 }
 
-$id_rua = intval($_GET['id_rua']);
+$tabela = $localidades[$localidade];
+if (!preg_match('/^[a-z0-9_]+$/', $tabela)) {
+    die("Erro: Tabela de localidade inválida.");
+}
+$tabelaEscapada = '[' . str_replace(']', ']]', $tabela) . ']';
 
-// ✅ Prepared Statement com SQLSRV para evitar SQL Injection
-$sql    = "SELECT h.id, h.data_trabalho, h.descricao_servico, r.nome_rua, r.localidade
-           FROM historico_trabalhos h
-           JOIN ruas r ON h.id_rua = r.id
-           WHERE h.id_rua = ?
-           ORDER BY h.data_trabalho DESC";
-$params = array($id_rua);
-$stmt   = sqlsrv_prepare($conn, $sql, $params);
+$sql  = "SELECT id, nome_rua, data_trabalho, tipo_trabalho, observacoes FROM $tabelaEscapada ORDER BY data_trabalho DESC, id DESC";
+$stmt = sqlsrv_prepare($conn, $sql);
 
 if ($stmt === false) {
     $errors = sqlsrv_errors();
@@ -31,10 +58,10 @@ if (!sqlsrv_execute($stmt)) {
 
 echo "<table style='border-collapse: collapse; width: 100%;'>
         <tr style='background-color: #333; color: white;'>
-            <th style='padding: 10px; border: 1px solid #ddd;'>Localidade</th>
             <th style='padding: 10px; border: 1px solid #ddd;'>Rua</th>
             <th style='padding: 10px; border: 1px solid #ddd;'>Data</th>
-            <th style='padding: 10px; border: 1px solid #ddd;'>Descrição</th>
+            <th style='padding: 10px; border: 1px solid #ddd;'>Tipo de Trabalho</th>
+            <th style='padding: 10px; border: 1px solid #ddd;'>Observações</th>
         </tr>";
 
 $temRegistos = false;
@@ -43,12 +70,11 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     $data = $row['data_trabalho'] instanceof DateTime
         ? $row['data_trabalho']->format('d/m/Y')
         : date('d/m/Y', strtotime($row['data_trabalho']));
-    // ✅ Output escaping (proteção contra XSS)
     echo "<tr style='border-bottom: 1px solid #ddd;'>
-            <td style='padding: 10px;'>" . htmlspecialchars($row['localidade']) . "</td>
             <td style='padding: 10px;'>" . htmlspecialchars($row['nome_rua']) . "</td>
             <td style='padding: 10px;'>" . htmlspecialchars($data) . "</td>
-            <td style='padding: 10px;'>" . htmlspecialchars($row['descricao_servico']) . "</td>
+            <td style='padding: 10px;'>" . htmlspecialchars($row['tipo_trabalho']) . "</td>
+            <td style='padding: 10px;'>" . htmlspecialchars((string) $row['observacoes']) . "</td>
           </tr>";
 }
 

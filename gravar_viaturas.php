@@ -75,7 +75,11 @@ if ($stmt === false) {
 }
 
 if (sqlsrv_execute($stmt)) {
+    sqlsrv_free_stmt($stmt);
+    sqlsrv_close($conn);
     redirect_with_message_viatura($viatura, 'success', 'Registo guardado com sucesso.');
 }
 
+sqlsrv_free_stmt($stmt);
+sqlsrv_close($conn);
 redirect_with_message_viatura($viatura, 'error', 'Erro ao guardar o registo.');

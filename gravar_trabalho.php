@@ -80,7 +80,11 @@ if ($stmt === false) {
 }
 
 if (sqlsrv_execute($stmt)) {
+    sqlsrv_free_stmt($stmt);
+    sqlsrv_close($conn);
     redirect_with_message($localidade, 'success', 'Trabalho registado com sucesso.');
 }
 
+sqlsrv_free_stmt($stmt);
+sqlsrv_close($conn);
 redirect_with_message($localidade, 'error', 'Erro ao guardar o trabalho.');
