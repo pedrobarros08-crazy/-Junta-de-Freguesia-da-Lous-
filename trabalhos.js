@@ -153,7 +153,7 @@ function atualizarRuas() {
             "Rua do Caminho Novo",
             "Travessa do Caminho Novo"
         ],
-        "Fornea": [
+        "Fórnea": [
             "Rua da Fórnea de Cá",
             "Rua da Fórnea de Lá",
             "Rua da Fórnea do Meio",
