@@ -1,6 +1,12 @@
 function atualizarRuas() {
-    const localidade = document.getElementById("trabalho").value;
+    const localidadeEl = document.getElementById("trabalho");
     const selectRua = document.getElementById("rua");
+
+    if (!localidadeEl || !selectRua) {
+        return;
+    }
+
+    const localidade = localidadeEl.value;
 
     const ruasPorLocalidade = {
         "Alfocheira": [
@@ -491,6 +497,8 @@ selectRua.innerHTML = '<option value="">Selecione a rua...</option>';
     }
 }
 
+// Nota: esta função usa localStorage como cache local.
+// O histórico real de trabalhos é gerido pelo backend em trabalhos.php (base de dados).
 function carregarHistorico() {
     const historico = JSON.parse(localStorage.getItem("meusTrabalhos")) || [];
     const bloco = document.getElementById("blocoHistorico");
