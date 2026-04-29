@@ -1,6 +1,6 @@
 # Sistema de Gestão - Junta de Freguesia da Lousã
 
-Sistema de gestão de trabalhos e viaturas desenvolvido para a Junta de Freguesia da Lousã.
+Sistema de gestão de trabalhos e viaturas desenvolvido para a [Junta de Freguesia da Lousã](https://www.freguesiadalousan.pt)
 
 ---
 
