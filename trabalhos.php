@@ -52,6 +52,8 @@ if ($tabelaSelecionada !== '') {
         while ($row = sqlsrv_fetch_array($res, SQLSRV_FETCH_ASSOC)) {
             $historico[] = $row;
         }
+    } else {
+        error_log('trabalhos.php: sqlsrv_query falhou - ' . print_r(sqlsrv_errors(), true));
     }
 }
 ?>
@@ -136,9 +138,12 @@ if ($tabelaSelecionada !== '') {
             <?php else: ?>
                 <?php foreach ($historico as $registo): ?>
                     <?php
-                    $data = $registo['data_trabalho'] instanceof DateTime
-                        ? $registo['data_trabalho']->format('d/m/Y')
-                        : date('d/m/Y', strtotime($registo['data_trabalho']));
+                    if ($registo['data_trabalho'] instanceof DateTime) {
+                        $data = $registo['data_trabalho']->format('d/m/Y');
+                    } else {
+                        $ts = strtotime((string) $registo['data_trabalho']);
+                        $data = $ts !== false ? date('d/m/Y', $ts) : htmlspecialchars((string) $registo['data_trabalho']);
+                    }
                     ?>
                     <tr>
                         <td><?php echo htmlspecialchars($registo['nome_rua']); ?></td>

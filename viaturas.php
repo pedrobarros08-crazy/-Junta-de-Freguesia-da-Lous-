@@ -41,6 +41,8 @@ if ($viaturaValida) {
                 $historico[] = $row;
                 $despesaTotal += (float) $row['valor'];
             }
+        } else {
+            error_log('viaturas.php: sqlsrv_query falhou - ' . print_r(sqlsrv_errors(), true));
         }
     }
 }
@@ -110,9 +112,12 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
                 <?php else: ?>
                     <?php foreach ($historico as $registo): ?>
                         <?php
-                        $data = $registo['data_servico'] instanceof DateTime
-                            ? $registo['data_servico']->format('d/m/Y')
-                            : date('d/m/Y', strtotime($registo['data_servico']));
+                        if ($registo['data_servico'] instanceof DateTime) {
+                            $data = $registo['data_servico']->format('d/m/Y');
+                        } else {
+                            $ts = strtotime((string) $registo['data_servico']);
+                            $data = $ts !== false ? date('d/m/Y', $ts) : htmlspecialchars((string) $registo['data_servico']);
+                        }
                         ?>
                         <tr>
                             <td><?php echo (int) $registo['id']; ?></td>

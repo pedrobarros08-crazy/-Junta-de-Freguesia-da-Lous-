@@ -40,27 +40,28 @@
             <div class="grid-form">
                 <div>
                     <label>Viatura:</label>
-                    <select id="cars" name="id_viatura" required>
+                    <select id="cars" name="viatura" required>
                         <option value="">Selecione...</option>
-                        <option value="1">Toyota Dyna 06-53-SM</option>
-                        <option value="2">Toyota Dyna 96-98-II</option>
-                        <option value="3">Mitsubishi 92-DU-20</option>
-                        <option value="4">Opel 01-77-LR</option>
-                        <option value="5">Hyundai 98-66-ST</option>
-                        <option value="6">Renault Clio 42-BH-11</option>
-                        <option value="7">Renault Kangoo 33-BJ-10</option>
-                        <option value="8">Trator Deutz</option>
-                        <option value="9">Dumper Astel</option>
-                        <option value="10">Retroescavadora Case</option>
+                        <option value="toyota_dyna_06_53_sm">Toyota Dyna 06-53-SM</option>
+                        <option value="toyota_dyna_96_98_ii">Toyota Dyna 96-98-II</option>
+                        <option value="mitsubishi_strakar_98_du_20">Mitsubishi Strakar 98-DU-20</option>
+                        <option value="hyndai_h1_98_66_st">Hyndai H1 98-66-ST</option>
+                        <option value="opel_campos_01_77_lr">Opel Campos 01-77-LR</option>
+                        <option value="renault_clio_42_bh_10">Renault Clio 42-BH-10</option>
+                        <option value="renault_kangoo_33_bj_10">Renault Kangoo 33-BJ-10</option>
+                        <option value="trato_deutz_58_so_96">Trato Deutz 58-SO-96</option>
+                        <option value="trator_case_84_dm_83">Trator Case 84-DM-83</option>
+                        <option value="retroescavadora_case_55_rr_48">Retroescavadora Case 55-RR-48</option>
+                        <option value="dumper_astel_00_aa_90">Dumper Astel 00-AA-90</option>
                     </select>
                 </div>
                 <div>
                     <label>Data:</label>
-                    <input type="date" id="data" name="data" required>
+                    <input type="date" id="data" name="data_servico" required>
                 </div>
                 <div class="full-width">
                     <label>O que foi feito?</label>
-                    <input type="text" id="tipoTrabalho" name="trabalho" placeholder="Ex: Mudança de óleo" required>
+                    <input type="text" id="tipoTrabalho" name="intervencao" placeholder="Ex: Mudança de óleo" required>
                 </div>
                 <div>
                     <label>Fornecedor:</label>
@@ -68,11 +69,11 @@
                 </div>
                 <div>
                     <label>Custo (€):</label>
-                    <input type="number" id="preco" name="preco" step="0.01" min="0" required>
+                    <input type="number" id="preco" name="valor" step="0.01" min="0" required>
                 </div>
                 <div>
                     <label>Kms Atuais:</label>
-                    <input type="number" id="kms" name="kms" min="0" required>
+                    <input type="number" id="kms" name="km" min="0" required>
                 </div>
             </div>
             <button type="submit" class="btn-gravar">Gravar Reparação</button>
@@ -156,7 +157,8 @@
             return;
         }
 
-        // ✅ Se validação passar, também guarda em localStorage (backup local)
+        // Nota: o histórico abaixo é apenas um cache local no browser.
+        // Os dados reais são guardados na base de dados via gravar_viaturas.php.
         const novaReparacao = {
             viatura: document.querySelector('#cars option:checked').text,
             data: data,
@@ -165,10 +167,6 @@
             kms: kms,
             preco: preco
         };
-
-        const historico = JSON.parse(localStorage.getItem('minhasReparacoes')) || [];
-        historico.push(novaReparacao);
-        localStorage.setItem('minhasReparacoes', JSON.stringify(historico));
 
         adicionarLinhaATabela(novaReparacao);
         // Deixar o form submeter para o backend
@@ -186,14 +184,13 @@
     }
 
     function carregarReparacoes() {
-        const historico = JSON.parse(localStorage.getItem('minhasReparacoes')) || [];
+        // O histórico de reparações é carregado a partir da base de dados em viaturas.php.
+        // Esta página (signin.html) mostra apenas os registos inseridos na sessão atual.
         corpoTabela.innerHTML = "";
-        historico.forEach(adicionarLinhaATabela);
     }
 
     function limparReparacoes() {
-        if(confirm("Deseja apagar todo o histórico de reparações?")) {
-            localStorage.removeItem('minhasReparacoes');
+        if(confirm("Deseja limpar a tabela de reparações desta sessão?")) {
             carregarReparacoes();
         }
     }
