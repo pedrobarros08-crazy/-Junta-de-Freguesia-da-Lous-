@@ -1,53 +1,27 @@
 <?php
 include 'config.php';
 
-$localidades = [
-    'Alfocheira' => 'trabalhos_alfocheira',
-    'Bairro dos Carvalhos' => 'trabalhos_bairro_dos_carvalhos',
-    'Cabeço do Moiro' => 'trabalhos_cabeco_do_moiro',
-    'Cabo do Soito' => 'trabalhos_cabo_do_soito',
-    'Cacilhas' => 'trabalhos_cacilhas',
-    'Casal dos Rios' => 'trabalhos_casal_dos_rios',
-    'Ceira dos Vales' => 'trabalhos_ceira_dos_vales',
-    'Cornaga' => 'trabalhos_cornaga',
-    'Cova da Areia' => 'trabalhos_cova_da_areia',
-    'Cova do Lobo' => 'trabalhos_cova_do_lobo',
-    'Eira de Calva' => 'trabalhos_eira_de_calva',
-    'Fórnea' => 'trabalhos_fornea',
-    'Lousã' => 'trabalhos_lousa',
-    'Meiral' => 'trabalhos_meiral',
-    'Padrão' => 'trabalhos_padrao',
-    'Pegos' => 'trabalhos_pegos',
-    'Penedo' => 'trabalhos_penedo',
-    'Poças' => 'trabalhos_pocas',
-    'Porto da Pedra' => 'trabalhos_porto_da_pedra',
-    'Póvoa da Lousã' => 'trabalhos_povoa_da_lousa',
-    'Ramalhais' => 'trabalhos_ramalhais',
-    'Vale de Maceira' => 'trabalhos_vale_de_maceira',
-    'Vale Domingos' => 'trabalhos_vale_domingos',
-    'Vale Neira' => 'trabalhos_vale_neira',
-    'Vale Nogueira' => 'trabalhos_vale_nogueira',
-    'Vale Pereira do Areal' => 'trabalhos_vale_pereira_do_areal',
-];
+// Carregar localidades da base de dados
+$sqlLocalidades = "SELECT id, nome FROM localidades ORDER BY nome";
+$resLocalidades = sqlsrv_query($conn, $sqlLocalidades);
+$localidades = [];
+if ($resLocalidades !== false) {
+    while ($row = sqlsrv_fetch_array($resLocalidades, SQLSRV_FETCH_ASSOC)) {
+        $localidades[(int)$row['id']] = $row['nome'];
+    }
+}
 
-$localidadeSelecionada = isset($_GET['localidade']) ? trim($_GET['localidade']) : '';
-$tabelaSelecionada = isset($localidades[$localidadeSelecionada]) ? $localidades[$localidadeSelecionada] : '';
+$localidadeId = isset($_GET['localidade_id']) ? (int)$_GET['localidade_id'] : 0;
+$localidadeSelecionada = isset($localidades[$localidadeId]) ? $localidades[$localidadeId] : '';
 
 $status = isset($_GET['status']) ? $_GET['status'] : '';
 $status = in_array($status, ['success', 'error'], true) ? $status : '';
 $message = isset($_GET['message']) ? $_GET['message'] : '';
 
 $historico = [];
-if ($tabelaSelecionada !== '') {
-    if (!preg_match('/^[a-z0-9_]+$/', $tabelaSelecionada)) {
-        $tabelaSelecionada = '';
-    }
-}
-
-if ($tabelaSelecionada !== '') {
-    $tabelaEscapada = '[' . str_replace(']', ']]', $tabelaSelecionada) . ']';
-    $sql = "SELECT id, nome_rua, data_trabalho, tipo_trabalho, observacoes FROM $tabelaEscapada ORDER BY data_trabalho DESC, id DESC";
-    $res = sqlsrv_query($conn, $sql);
+if ($localidadeId > 0 && $localidadeSelecionada !== '') {
+    $sql = "SELECT id, nome_rua, data_trabalho, tipo_trabalho, observacoes FROM trabalhos WHERE id_localidade = ? ORDER BY data_trabalho DESC, id DESC";
+    $res = sqlsrv_query($conn, $sql, [$localidadeId]);
     if ($res !== false) {
         while ($row = sqlsrv_fetch_array($res, SQLSRV_FETCH_ASSOC)) {
             $historico[] = $row;
@@ -94,23 +68,23 @@ if ($tabelaSelecionada !== '') {
     </div>
 
     <form method="GET">
-        <label for="localidade">Localidade:</label>
-        <select id="localidade" name="localidade" onchange="this.form.submit()" required>
+        <label for="localidade_id">Localidade:</label>
+        <select id="localidade_id" name="localidade_id" onchange="this.form.submit()" required>
             <option value="">Selecione a localidade</option>
-            <?php foreach ($localidades as $nome => $tabela): ?>
-                <option value="<?php echo htmlspecialchars($nome); ?>"<?php echo $localidadeSelecionada === $nome ? ' selected' : ''; ?>>
+            <?php foreach ($localidades as $id => $nome): ?>
+                <option value="<?php echo $id; ?>"<?php echo $localidadeId === $id ? ' selected' : ''; ?>>
                     <?php echo htmlspecialchars($nome); ?>
                 </option>
             <?php endforeach; ?>
         </select>
     </form>
 
-    <?php if ($tabelaSelecionada === ''): ?>
+    <?php if ($localidadeSelecionada === ''): ?>
         <p class="helper">Selecione uma localidade para consultar o histórico e registar novos trabalhos.</p>
     <?php else: ?>
         <h3 style="margin-top: 30px;">Novo Registo (<?php echo htmlspecialchars($localidadeSelecionada); ?>)</h3>
         <form action="gravar_trabalho.php" method="POST">
-            <input type="hidden" name="localidade" value="<?php echo htmlspecialchars($localidadeSelecionada); ?>">
+            <input type="hidden" name="localidade_id" value="<?php echo $localidadeId; ?>">
 
             <label for="nome_rua">Rua:</label>
             <input type="text" id="nome_rua" name="nome_rua" required maxlength="255">
