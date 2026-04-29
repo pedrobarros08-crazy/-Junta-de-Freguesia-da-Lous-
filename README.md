@@ -115,5 +115,5 @@ gestao-junta/
 
 ## 👤 Autor
 
-Desenvolvido no âmbito de estágio na Junta de Freguesia da Lousã.
+Desenvolvido no âmbito de estágio na [Junta de Freguesia da Lousã](https://www.freguesiadalousan.pt)
 
