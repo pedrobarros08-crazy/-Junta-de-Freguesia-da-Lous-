@@ -27,7 +27,7 @@ INSERT INTO viaturas (nome, matricula) VALUES
 (N'Toyota Dyna 06-53-SM', N'06-53-SM'),
 (N'Toyota Dyna 96-98-II', N'96-98-II'),
 (N'Mitsubishi Strakar 98-DU-20', N'98-DU-20'),
-(N'Hyndai H1 98-66-ST', N'98-66-ST'),
+(N'Hyundai H1 98-66-ST', N'98-66-ST'),
 (N'Opel Campos 01-77-LR', N'01-77-LR'),
 (N'Renault Kangoo 33-BJ-10', N'33-BJ-10'),
 (N'Renault Clio 42-BH-10', N'42-BH-10'),

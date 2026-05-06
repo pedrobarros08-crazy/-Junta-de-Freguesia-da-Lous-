@@ -28,32 +28,32 @@ $tipoTrabalho = isset($_POST['tipo_trabalho']) ? trim($_POST['tipo_trabalho']) :
 $observacoes = isset($_POST['observacoes']) ? trim($_POST['observacoes']) : '';
 
 if ($nomeRua === '' || $tipoTrabalho === '') {
-    redirect_with_message($localidade, 'error', 'Rua e tipo de trabalho são obrigatórios.');
+    redirect_with_message($localidadeId, 'error', 'Rua e tipo de trabalho são obrigatórios.');
 }
 
 $dataObj = DateTime::createFromFormat('Y-m-d', $dataInput);
 if (!$dataObj || $dataObj->format('Y-m-d') !== $dataInput) {
-    redirect_with_message($localidade, 'error', 'Data inválida.');
+    redirect_with_message($localidadeId, 'error', 'Data inválida.');
 }
 
 if (mb_strlen($nomeRua, 'UTF-8') > 255 || mb_strlen($tipoTrabalho, 'UTF-8') > 255 || mb_strlen($observacoes, 'UTF-8') > 2000) {
-    redirect_with_message($localidade, 'error', 'Um ou mais campos excedem o tamanho permitido.');
+    redirect_with_message($localidadeId, 'error', 'Um ou mais campos excedem o tamanho permitido.');
 }
 
-$sql = "INSERT INTO $tabelaEscapada (nome_rua, data_trabalho, tipo_trabalho, observacoes) VALUES (?, ?, ?, ?)";
-$params = [$nomeRua, $dataInput, $tipoTrabalho, $observacoes];
+$sql = "INSERT INTO trabalhos (id_localidade, nome_rua, data_trabalho, tipo_trabalho, observacoes) VALUES (?, ?, ?, ?, ?)";
+$params = [$localidadeId, $nomeRua, $dataInput, $tipoTrabalho, $observacoes];
 $stmt = sqlsrv_prepare($conn, $sql, $params);
 
 if ($stmt === false) {
-    redirect_with_message($localidade, 'error', 'Erro interno ao preparar o registo.');
+    redirect_with_message($localidadeId, 'error', 'Erro interno ao preparar o registo.');
 }
 
 if (sqlsrv_execute($stmt)) {
     sqlsrv_free_stmt($stmt);
     sqlsrv_close($conn);
-    redirect_with_message($localidade, 'success', 'Trabalho registado com sucesso.');
+    redirect_with_message($localidadeId, 'success', 'Trabalho registado com sucesso.');
 }
 
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
-redirect_with_message($localidade, 'error', 'Erro ao guardar o trabalho.');
+redirect_with_message($localidadeId, 'error', 'Erro ao guardar o trabalho.');

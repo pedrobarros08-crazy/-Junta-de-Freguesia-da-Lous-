@@ -1,53 +1,21 @@
 <?php
 include 'config.php';
 
-$localidades = [
-    'Alfocheira'           => 'trabalhos_alfocheira',
-    'Bairro dos Carvalhos' => 'trabalhos_bairro_dos_carvalhos',
-    'Cabeço do Moiro'      => 'trabalhos_cabeco_do_moiro',
-    'Cabo do Soito'        => 'trabalhos_cabo_do_soito',
-    'Cacilhas'             => 'trabalhos_cacilhas',
-    'Casal dos Rios'       => 'trabalhos_casal_dos_rios',
-    'Ceira dos Vales'      => 'trabalhos_ceira_dos_vales',
-    'Cornaga'              => 'trabalhos_cornaga',
-    'Cova da Areia'        => 'trabalhos_cova_da_areia',
-    'Cova do Lobo'         => 'trabalhos_cova_do_lobo',
-    'Eira de Calva'        => 'trabalhos_eira_de_calva',
-    'Fórnea'               => 'trabalhos_fornea',
-    'Lousã'                => 'trabalhos_lousa',
-    'Meiral'               => 'trabalhos_meiral',
-    'Padrão'               => 'trabalhos_padrao',
-    'Pegos'                => 'trabalhos_pegos',
-    'Penedo'               => 'trabalhos_penedo',
-    'Poças'                => 'trabalhos_pocas',
-    'Porto da Pedra'       => 'trabalhos_porto_da_pedra',
-    'Póvoa da Lousã'       => 'trabalhos_povoa_da_lousa',
-    'Ramalhais'            => 'trabalhos_ramalhais',
-    'Vale de Maceira'      => 'trabalhos_vale_de_maceira',
-    'Vale Domingos'        => 'trabalhos_vale_domingos',
-    'Vale Neira'           => 'trabalhos_vale_neira',
-    'Vale Nogueira'        => 'trabalhos_vale_nogueira',
-    'Vale Pereira do Areal'=> 'trabalhos_vale_pereira_do_areal',
-];
+$localidadeId = isset($_GET['localidade_id']) ? (int)$_GET['localidade_id'] : 0;
+$nomeRua      = isset($_GET['rua'])           ? trim($_GET['rua'])           : '';
 
-$localidade = isset($_GET['localidade']) ? trim($_GET['localidade']) : '';
-$nomeRua    = isset($_GET['rua'])        ? trim($_GET['rua'])        : '';
-
-if (!isset($localidades[$localidade])) {
+// Validar localidade na base de dados
+$sqlCheck = "SELECT id FROM localidades WHERE id = ?";
+$stmtCheck = sqlsrv_prepare($conn, $sqlCheck, [$localidadeId]);
+if ($stmtCheck === false || !sqlsrv_execute($stmtCheck) || !sqlsrv_fetch_array($stmtCheck)) {
     die("Erro: Localidade inválida.");
 }
 if ($nomeRua === '') {
     die("Erro: Nome de rua em falta.");
 }
 
-$tabela = $localidades[$localidade];
-if (!preg_match('/^[a-z0-9_]+$/', $tabela)) {
-    die("Erro: Tabela de localidade inválida.");
-}
-$tabelaEscapada = '[' . str_replace(']', ']]', $tabela) . ']';
-
-$sql    = "SELECT id, data_trabalho, tipo_trabalho, observacoes FROM $tabelaEscapada WHERE nome_rua = ? ORDER BY data_trabalho DESC, id DESC";
-$params = [$nomeRua];
+$sql    = "SELECT id, data_trabalho, tipo_trabalho, observacoes FROM trabalhos WHERE id_localidade = ? AND nome_rua = ? ORDER BY data_trabalho DESC, id DESC";
+$params = [$localidadeId, $nomeRua];
 $stmt   = sqlsrv_prepare($conn, $sql, $params);
 
 if ($stmt === false) {

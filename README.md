@@ -33,11 +33,10 @@ Sistema de gestão de trabalhos e viaturas desenvolvido para a Junta de Freguesi
 No **SQL Server Management Studio**, execute os scripts SQL pela seguinte ordem:
 
 ```sql
--- 1. Criar as tabelas de ruas e trabalhos
+-- 1. Criar as tabelas de localidades e trabalhos
 -- Executar: gestao_junta.sql
--- Executar: historico_trabalhos.sql
 
--- 2. Criar as tabelas de viaturas
+-- 2. Criar as tabelas de viaturas e manutenções
 -- Executar: viaturas.sql
 ```
 
@@ -77,18 +76,16 @@ gestao-junta/
 ├── .gitignore              # Ficheiros ignorados pelo Git
 ├── loader.env.php          # Carregador de variáveis de ambiente
 ├── config.php              # Configuração da ligação à BD
-├── config_viaturas.php     # Configuração alternativa (SQLSRV)
 ├── index.html              # Menu principal
-├── trabalhos.php           # Gestão de trabalhos
-├── signin.php              # Gestão de viaturas
+├── trabalhos.php           # Gestão de trabalhos por localidade
 ├── gravar_trabalho.php     # Gravação de trabalhos
-├── gravar_viaturas.php     # Gravação de reparações
-├── ver_historico.php       # Histórico de trabalhos por rua
-├── ver_historicoviaturas.php # Histórico de manutenções por viatura
-├── ver_rua.php             # Detalhes de trabalho por ID
-├── gestao_junta.sql        # Script SQL - ruas e localidades
-├── historico_trabalhos.sql # Script SQL - tabela de trabalhos
-└── viaturas.sql            # Script SQL - viaturas e manutenções
+├── ver_historico.php       # Histórico de trabalhos por localidade (AJAX)
+├── ver_rua.php             # Detalhes de trabalho por rua (AJAX)
+├── viaturas.php            # Gestão de viaturas e manutenções
+├── gravar_viaturas.php     # Gravação de manutenções
+├── ver_historicoviaturas.php # Histórico de manutenções por viatura (AJAX)
+├── gestao_junta.sql        # Schema normalizado: localidades + trabalhos
+└── viaturas.sql            # Schema normalizado: viaturas + manutencoes_viaturas
 ```
 
 ---
