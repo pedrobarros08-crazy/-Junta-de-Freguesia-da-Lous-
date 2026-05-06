@@ -1,39 +1,10 @@
 <?php
 include 'config.php';
 
-$localidades = [
-    'Alfocheira' => 'trabalhos_alfocheira',
-    'Bairro dos Carvalhos' => 'trabalhos_bairro_dos_carvalhos',
-    'Cabeço do Moiro' => 'trabalhos_cabeco_do_moiro',
-    'Cabo do Soito' => 'trabalhos_cabo_do_soito',
-    'Cacilhas' => 'trabalhos_cacilhas',
-    'Casal dos Rios' => 'trabalhos_casal_dos_rios',
-    'Ceira dos Vales' => 'trabalhos_ceira_dos_vales',
-    'Cornaga' => 'trabalhos_cornaga',
-    'Cova da Areia' => 'trabalhos_cova_da_areia',
-    'Cova do Lobo' => 'trabalhos_cova_do_lobo',
-    'Eira de Calva' => 'trabalhos_eira_de_calva',
-    'Fórnea' => 'trabalhos_fornea',
-    'Lousã' => 'trabalhos_lousa',
-    'Meiral' => 'trabalhos_meiral',
-    'Padrão' => 'trabalhos_padrao',
-    'Pegos' => 'trabalhos_pegos',
-    'Penedo' => 'trabalhos_penedo',
-    'Poças' => 'trabalhos_pocas',
-    'Porto da Pedra' => 'trabalhos_porto_da_pedra',
-    'Póvoa da Lousã' => 'trabalhos_povoa_da_lousa',
-    'Ramalhais' => 'trabalhos_ramalhais',
-    'Vale de Maceira' => 'trabalhos_vale_de_maceira',
-    'Vale Domingos' => 'trabalhos_vale_domingos',
-    'Vale Neira' => 'trabalhos_vale_neira',
-    'Vale Nogueira' => 'trabalhos_vale_nogueira',
-    'Vale Pereira do Areal' => 'trabalhos_vale_pereira_do_areal',
-];
-
-function redirect_with_message($localidade, $status, $message)
+function redirect_with_message($localidadeId, $status, $message)
 {
     $status = in_array($status, ['success', 'error'], true) ? $status : 'error';
-    $query = 'localidade=' . urlencode($localidade) . '&status=' . urlencode($status) . '&message=' . urlencode($message);
+    $query = 'localidade_id=' . urlencode((string)(int)$localidadeId) . '&status=' . urlencode($status) . '&message=' . urlencode($message);
     header('Location: trabalhos.php?' . $query);
     exit;
 }
@@ -43,48 +14,46 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$localidade = isset($_POST['localidade']) ? trim($_POST['localidade']) : '';
-if (!isset($localidades[$localidade])) {
-    redirect_with_message('', 'error', 'Localidade inválida.');
-}
+$localidadeId = isset($_POST['localidade_id']) ? (int)$_POST['localidade_id'] : 0;
 
-$tabela = $localidades[$localidade];
-if (!preg_match('/^[a-z0-9_]+$/', $tabela)) {
-    redirect_with_message($localidade, 'error', 'Tabela de localidade inválida.');
+// Validar localidade na base de dados
+$sqlCheck = "SELECT id FROM localidades WHERE id = ?";
+$stmtCheck = sqlsrv_prepare($conn, $sqlCheck, [$localidadeId]);
+if ($stmtCheck === false || !sqlsrv_execute($stmtCheck) || !sqlsrv_fetch_array($stmtCheck)) {
+    redirect_with_message(0, 'error', 'Localidade inválida.');
 }
-$tabelaEscapada = '[' . str_replace(']', ']]', $tabela) . ']';
 $nomeRua = isset($_POST['nome_rua']) ? trim($_POST['nome_rua']) : '';
 $dataInput = isset($_POST['data_trabalho']) ? trim($_POST['data_trabalho']) : '';
 $tipoTrabalho = isset($_POST['tipo_trabalho']) ? trim($_POST['tipo_trabalho']) : '';
 $observacoes = isset($_POST['observacoes']) ? trim($_POST['observacoes']) : '';
 
 if ($nomeRua === '' || $tipoTrabalho === '') {
-    redirect_with_message($localidade, 'error', 'Rua e tipo de trabalho são obrigatórios.');
+    redirect_with_message($localidadeId, 'error', 'Rua e tipo de trabalho são obrigatórios.');
 }
 
 $dataObj = DateTime::createFromFormat('Y-m-d', $dataInput);
 if (!$dataObj || $dataObj->format('Y-m-d') !== $dataInput) {
-    redirect_with_message($localidade, 'error', 'Data inválida.');
+    redirect_with_message($localidadeId, 'error', 'Data inválida.');
 }
 
 if (mb_strlen($nomeRua, 'UTF-8') > 255 || mb_strlen($tipoTrabalho, 'UTF-8') > 255 || mb_strlen($observacoes, 'UTF-8') > 2000) {
-    redirect_with_message($localidade, 'error', 'Um ou mais campos excedem o tamanho permitido.');
+    redirect_with_message($localidadeId, 'error', 'Um ou mais campos excedem o tamanho permitido.');
 }
 
-$sql = "INSERT INTO $tabelaEscapada (nome_rua, data_trabalho, tipo_trabalho, observacoes) VALUES (?, ?, ?, ?)";
-$params = [$nomeRua, $dataInput, $tipoTrabalho, $observacoes];
+$sql = "INSERT INTO trabalhos (id_localidade, nome_rua, data_trabalho, tipo_trabalho, observacoes) VALUES (?, ?, ?, ?, ?)";
+$params = [$localidadeId, $nomeRua, $dataInput, $tipoTrabalho, $observacoes];
 $stmt = sqlsrv_prepare($conn, $sql, $params);
 
 if ($stmt === false) {
-    redirect_with_message($localidade, 'error', 'Erro interno ao preparar o registo.');
+    redirect_with_message($localidadeId, 'error', 'Erro interno ao preparar o registo.');
 }
 
 if (sqlsrv_execute($stmt)) {
     sqlsrv_free_stmt($stmt);
     sqlsrv_close($conn);
-    redirect_with_message($localidade, 'success', 'Trabalho registado com sucesso.');
+    redirect_with_message($localidadeId, 'success', 'Trabalho registado com sucesso.');
 }
 
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
-redirect_with_message($localidade, 'error', 'Erro ao guardar o trabalho.');
+redirect_with_message($localidadeId, 'error', 'Erro ao guardar o trabalho.');
