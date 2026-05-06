@@ -48,7 +48,8 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
         .container { max-width: 1100px; margin: auto; }
         .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
-        .btn-viatura { display: block; text-align: center; text-decoration: none; padding: 10px; border-radius: 6px; background-color: #e9ecef; color: #222; font-weight: 600; border: 1px solid #d3d7db; }
+        .btn-viatura { display: block; text-align: center; text-decoration: none; padding: 10px; border-radius: 6px; background-color: #e9ecef; color: #222; font-weight: 600; border: 1px solid #d3d9df; transition: 0.3s; }
+        .btn-viatura:hover { background-color: #d3d9df; }
         .btn-viatura.active { background-color: #3498db; color: white; border-color: #3498db; }
         .status-error { color: #dc3545; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
         .status-success { color: #155724; background-color: #d4edda; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
@@ -59,8 +60,12 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
         input, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
         textarea { min-height: 80px; resize: vertical; }
         .btn-submit { margin-top: 15px; width: 100%; padding: 10px; border: none; border-radius: 4px; background: #2ecc71; color: white; font-weight: 700; cursor: pointer; }
+        .btn-submit:hover { background-color: #27ae60; }
+        .btn-delete { background-color: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .btn-delete:hover { background-color: #c0392b; }
         .resumo { margin-top: 12px; display: flex; gap: 25px; flex-wrap: wrap; }
-        .btn-voltar { background-color: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; display: block; width: 100%; text-align: center; text-decoration: none; box-sizing: border-box; }
+        .btn-voltar { background-color: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; display: block; width: 100%; transition: 0.3s; }
+        .btn-voltar:hover { background-color: #7f8c8d; }
     </style>
 </head>
 <body>
@@ -93,11 +98,12 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
                     <th>Intervenção</th>
                     <th>Valor</th>
                     <th>Fornecedor</th>
+                    <th>Ações</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php if (empty($historico)): ?>
-                    <tr><td colspan="6" style="text-align:center;">Sem registos para esta viatura.</td></tr>
+                    <tr><td colspan="7" style="text-align:center;">Sem registos para esta viatura.</td></tr>
                 <?php else: ?>
                     <?php foreach ($historico as $registo): ?>
                         <?php
@@ -115,6 +121,13 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
                             <td><?php echo htmlspecialchars($registo['intervencao']); ?></td>
                             <td><?php echo htmlspecialchars(number_format((float) $registo['valor'], 2, ',', '.')) . ' €'; ?></td>
                             <td><?php echo htmlspecialchars($registo['fornecedor']); ?></td>
+                            <td>
+                                <form method="POST" action="eliminar_viatura.php" style="display:inline;" onsubmit="return confirm('Tem a certeza que deseja eliminar este registo?');">
+                                    <input type="hidden" name="manutencao_id" value="<?php echo $registo['id']; ?>">
+                                    <input type="hidden" name="viatura_id" value="<?php echo $viaturaId; ?>">
+                                    <button type="submit" class="btn-delete">Eliminar</button>
+                                </form>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
