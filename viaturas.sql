@@ -31,7 +31,7 @@ INSERT INTO viaturas (nome, matricula) VALUES
 (N'Opel Campos 01-77-LR', N'01-77-LR'),
 (N'Renault Kangoo 33-BJ-10', N'33-BJ-10'),
 (N'Renault Clio 42-BH-10', N'42-BH-10'),
-(N'Trato Deutz 58-SO-96', N'58-SO-96'),
+(N'Trator Deutz 58-SO-96', N'58-SO-96'),
 (N'Trator Case 84-DM-83', N'84-DM-83'),
 (N'Retroescavadora Case 55-RR-48', N'55-RR-48'),
 (N'Dumper Astel 00-AA-90', N'00-AA-90');
