@@ -44,8 +44,10 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
         textarea { min-height: 80px; resize: vertical; }
         .btn-gravar { background-color: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; width: 100%; transition: 0.3s; }
         .btn-gravar:hover { background-color: #27ae60; }
-        .btn-voltar { background-color: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; display: block; width: 100%; text-align: center; text-decoration: none; box-sizing: border-box; transition: 0.3s; }
+        .btn-voltar { background-color: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; display: block; width: 100%; transition: 0.3s; }
         .btn-voltar:hover { background-color: #7f8c8d; }
+        .btn-delete { background-color: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .btn-delete:hover { background-color: #c0392b; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background-color: #2c3e50; color: white; }
@@ -104,11 +106,11 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
         <h3 style="margin-top: 30px;">Histórico de Trabalhos</h3>
         <table>
             <thead>
-                <tr><th>Rua</th><th>Data</th><th>Tipo de Trabalho</th><th>Observações</th></tr>
+                <tr><th>Rua</th><th>Data</th><th>Tipo de Trabalho</th><th>Observações</th><th>Ações</th></tr>
             </thead>
             <tbody>
             <?php if (empty($historico)): ?>
-                <tr><td colspan="4" style="text-align:center;">Sem registos para esta localidade.</td></tr>
+                <tr><td colspan="5" style="text-align:center;">Sem registos para esta localidade.</td></tr>
             <?php else: ?>
                 <?php foreach ($historico as $registo): ?>
                     <?php
@@ -124,6 +126,13 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
                         <td><?php echo htmlspecialchars($data); ?></td>
                         <td><?php echo htmlspecialchars($registo['tipo_trabalho']); ?></td>
                         <td><?php echo htmlspecialchars((string) $registo['observacoes']); ?></td>
+                        <td>
+                            <form method="POST" action="eliminar_trabalho.php" style="display:inline;" onsubmit="return confirm('Tem a certeza que deseja eliminar este registo?');">
+                                <input type="hidden" name="trabalho_id" value="<?php echo $registo['id']; ?>">
+                                <input type="hidden" name="localidade_id" value="<?php echo $localidadeId; ?>">
+                                <button type="submit" class="btn-delete">Eliminar</button>
+                            </form>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
