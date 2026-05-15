@@ -142,7 +142,12 @@ function login_user(string $username): void
 {
     session_regenerate_id(true);
     $configuredUserId = filter_var(getenv('APP_USER_ID'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-    $_SESSION['user_id'] = $configuredUserId !== false ? (int) $configuredUserId : 1;
+    if ($configuredUserId === false) {
+        error_log('security.php: APP_USER_ID inválido, fallback para user_id=1');
+        $_SESSION['user_id'] = 1;
+    } else {
+        $_SESSION['user_id'] = (int) $configuredUserId;
+    }
     $_SESSION['username'] = $username;
     get_csrf_token();
 }
