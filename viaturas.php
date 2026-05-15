@@ -89,13 +89,13 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
     </div>
     <div class="box">
         <h2>Viaturas</h2>
-        <?php if ($status === 'error'): ?><div class="status-error"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
-        <?php if ($status === 'success'): ?><div class="status-success"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
+        <?php if ($status === 'error'): ?><div class="status-error"><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
+        <?php if ($status === 'success'): ?><div class="status-success"><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
 
         <div class="grid">
             <?php foreach ($viaturas as $id => $nome): ?>
                 <a class="btn-viatura<?php echo $viaturaId === $id ? ' active' : ''; ?>" href="viaturas.php?viatura_id=<?php echo $id; ?>">
-                    <?php echo htmlspecialchars($nome); ?>
+                    <?php echo htmlspecialchars($nome, ENT_QUOTES, 'UTF-8'); ?>
                 </a>
             <?php endforeach; ?>
         </div>
@@ -133,11 +133,11 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
                         ?>
                         <tr>
                             <td><?php echo (int) $registo['id']; ?></td>
-                            <td><?php echo htmlspecialchars($data); ?></td>
-                            <td><?php echo htmlspecialchars((string) $registo['km']); ?></td>
-                            <td><?php echo htmlspecialchars($registo['intervencao']); ?></td>
-                            <td><?php echo htmlspecialchars(number_format((float) $registo['valor'], 2, ',', '.')) . ' €'; ?></td>
-                            <td><?php echo htmlspecialchars($registo['fornecedor']); ?></td>
+                            <td><?php echo htmlspecialchars($data, ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars((string) $registo['km'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars($registo['intervencao'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars(number_format((float) $registo['valor'], 2, ',', '.'), ENT_QUOTES, 'UTF-8') . ' €'; ?></td>
+                            <td><?php echo htmlspecialchars($registo['fornecedor'], ENT_QUOTES, 'UTF-8'); ?></td>
                             <td>
                                 <form method="POST" action="eliminar_viatura.php" style="display:inline;" onsubmit="return confirm('Tem a certeza que deseja eliminar este registo?');">
                                     <input type="hidden" name="manutencao_id" value="<?php echo (int) $registo['id']; ?>">
@@ -152,8 +152,8 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
                 </tbody>
             </table>
             <div class="resumo">
-                <strong>Despesa Total: <?php echo htmlspecialchars(number_format($despesaTotal, 2, ',', '.')); ?> €</strong>
-                <strong>Total c/IVA (23%): <?php echo htmlspecialchars(number_format($totalComIva, 2, ',', '.')); ?> €</strong>
+                <strong>Despesa Total: <?php echo htmlspecialchars(number_format($despesaTotal, 2, ',', '.'), ENT_QUOTES, 'UTF-8'); ?> €</strong>
+                <strong>Total c/IVA (23%): <?php echo htmlspecialchars(number_format($totalComIva, 2, ',', '.'), ENT_QUOTES, 'UTF-8'); ?> €</strong>
             </div>
         <?php endif; ?>
     </div>

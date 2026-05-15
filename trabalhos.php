@@ -80,10 +80,10 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
     <h2>Registo de Trabalhos por Localidade</h2>
 
     <div class="error-message<?php echo $status === 'error' ? ' show' : ''; ?>">
-        <?php echo $status === 'error' ? htmlspecialchars($message) : ''; ?>
+        <?php echo $status === 'error' ? htmlspecialchars($message, ENT_QUOTES, 'UTF-8') : ''; ?>
     </div>
     <div class="success-message<?php echo $status === 'success' ? ' show' : ''; ?>">
-        <?php echo $status === 'success' ? htmlspecialchars($message) : ''; ?>
+        <?php echo $status === 'success' ? htmlspecialchars($message, ENT_QUOTES, 'UTF-8') : ''; ?>
     </div>
 
     <form method="GET">
@@ -92,7 +92,7 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
             <option value="">Selecione a localidade</option>
             <?php foreach ($localidades as $id => $nome): ?>
                 <option value="<?php echo $id; ?>"<?php echo $localidadeId === $id ? ' selected' : ''; ?>>
-                    <?php echo htmlspecialchars($nome); ?>
+                    <?php echo htmlspecialchars($nome, ENT_QUOTES, 'UTF-8'); ?>
                 </option>
             <?php endforeach; ?>
         </select>
@@ -101,7 +101,7 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
     <?php if ($localidadeSelecionada === ''): ?>
         <p class="helper">Selecione uma localidade para consultar o histórico e registar novos trabalhos.</p>
     <?php else: ?>
-        <h3 style="margin-top: 30px;">Novo Registo (<?php echo htmlspecialchars($localidadeSelecionada); ?>)</h3>
+        <h3 style="margin-top: 30px;">Novo Registo (<?php echo htmlspecialchars($localidadeSelecionada, ENT_QUOTES, 'UTF-8'); ?>)</h3>
         <form action="gravar_trabalho.php" method="POST">
             <input type="hidden" name="localidade_id" value="<?php echo (int) $localidadeId; ?>">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(get_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
@@ -140,10 +140,10 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
                     }
                     ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($registo['nome_rua']); ?></td>
-                        <td><?php echo htmlspecialchars($data); ?></td>
-                        <td><?php echo htmlspecialchars($registo['tipo_trabalho']); ?></td>
-                        <td><?php echo htmlspecialchars((string) $registo['observacoes']); ?></td>
+                         <td><?php echo htmlspecialchars($registo['nome_rua'], ENT_QUOTES, 'UTF-8'); ?></td>
+                         <td><?php echo htmlspecialchars($data, ENT_QUOTES, 'UTF-8'); ?></td>
+                         <td><?php echo htmlspecialchars($registo['tipo_trabalho'], ENT_QUOTES, 'UTF-8'); ?></td>
+                         <td><?php echo htmlspecialchars((string) $registo['observacoes'], ENT_QUOTES, 'UTF-8'); ?></td>
                         <td>
                             <form method="POST" action="eliminar_trabalho.php" style="display:inline;" onsubmit="return confirm('Tem a certeza que deseja eliminar este registo?');">
                                 <input type="hidden" name="trabalho_id" value="<?php echo (int) $registo['id']; ?>">

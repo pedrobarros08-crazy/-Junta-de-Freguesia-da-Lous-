@@ -45,15 +45,19 @@ echo "<table style='border-collapse: collapse; width: 100%;'>
 $temRegistos = false;
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     $temRegistos = true;
-    $data = $row['data_servico'] instanceof DateTime
-        ? $row['data_servico']->format('d/m/Y')
-        : date('d/m/Y', strtotime($row['data_servico']));
+    if ($row['data_servico'] instanceof DateTime) {
+        $data = $row['data_servico']->format('d/m/Y');
+    } else {
+        $rawDate = (string) $row['data_servico'];
+        $ts = strtotime($rawDate);
+        $data = $ts !== false ? date('d/m/Y', $ts) : $rawDate;
+    }
     echo "<tr style='border-bottom: 1px solid #ddd;'>
-            <td style='padding: 10px;'>" . htmlspecialchars($data) . "</td>
-            <td style='padding: 10px;'>" . htmlspecialchars((string) $row['km']) . " km</td>
-            <td style='padding: 10px;'>" . htmlspecialchars($row['intervencao']) . "</td>
-            <td style='padding: 10px;'>" . htmlspecialchars(number_format((float) $row['valor'], 2, ',', '.')) . " €</td>
-            <td style='padding: 10px;'>" . htmlspecialchars($row['fornecedor']) . "</td>
+            <td style='padding: 10px;'>" . htmlspecialchars($data, ENT_QUOTES, 'UTF-8') . "</td>
+            <td style='padding: 10px;'>" . htmlspecialchars((string) $row['km'], ENT_QUOTES, 'UTF-8') . " km</td>
+            <td style='padding: 10px;'>" . htmlspecialchars($row['intervencao'], ENT_QUOTES, 'UTF-8') . "</td>
+            <td style='padding: 10px;'>" . htmlspecialchars(number_format((float) $row['valor'], 2, ',', '.'), ENT_QUOTES, 'UTF-8') . " €</td>
+            <td style='padding: 10px;'>" . htmlspecialchars($row['fornecedor'], ENT_QUOTES, 'UTF-8') . "</td>
           </tr>";
 }
 

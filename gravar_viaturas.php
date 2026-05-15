@@ -63,18 +63,23 @@ if ($intervencao === '' || $fornecedor === '') {
     redirect_with_message_viatura($viaturaId, 'error', 'Intervenção e fornecedor são obrigatórios.');
 }
 
-if (!is_numeric($km) || (int)$km < 0) {
+if (!preg_match('/^\d+$/', $km)) {
     cleanup_sqlsrv($conn, $stmtCheck);
     redirect_with_message_viatura($viaturaId, 'error', 'KM inválido.');
 }
 
-if (!is_numeric($valor) || (float)$valor <= 0) {
+if (!preg_match('/^\d+(?:[.,]\d{1,2})?$/', $valor)) {
+    cleanup_sqlsrv($conn, $stmtCheck);
+    redirect_with_message_viatura($viaturaId, 'error', 'Valor inválido.');
+}
+$valorNormalizado = (float) str_replace(',', '.', $valor);
+if ($valorNormalizado <= 0) {
     cleanup_sqlsrv($conn, $stmtCheck);
     redirect_with_message_viatura($viaturaId, 'error', 'Valor inválido.');
 }
 
 $sql = "INSERT INTO manutencoes_viaturas (id_viatura, data_servico, km, intervencao, valor, fornecedor) VALUES (?, ?, ?, ?, ?, ?)";
-$params = [$viaturaId, $dataServico, (int)$km, $intervencao, (float)$valor, $fornecedor];
+$params = [$viaturaId, $dataServico, (int)$km, $intervencao, $valorNormalizado, $fornecedor];
 $stmt = sqlsrv_prepare($conn, $sql, $params);
 
 if ($stmt === false) {

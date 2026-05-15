@@ -33,12 +33,16 @@ if (!sqlsrv_execute($stmt)) {
 $temRegistos = false;
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     $temRegistos = true;
-    $data = $row['data_trabalho'] instanceof DateTime
-        ? $row['data_trabalho']->format('d/m/Y')
-        : date('d/m/Y', strtotime($row['data_trabalho']));
-    echo htmlspecialchars($data) . ' — ' . htmlspecialchars($row['tipo_trabalho']);
+    if ($row['data_trabalho'] instanceof DateTime) {
+        $data = $row['data_trabalho']->format('d/m/Y');
+    } else {
+        $rawDate = (string) $row['data_trabalho'];
+        $ts = strtotime($rawDate);
+        $data = $ts !== false ? date('d/m/Y', $ts) : $rawDate;
+    }
+    echo htmlspecialchars($data, ENT_QUOTES, 'UTF-8') . ' — ' . htmlspecialchars($row['tipo_trabalho'], ENT_QUOTES, 'UTF-8');
     if (!empty($row['observacoes'])) {
-        echo ': ' . htmlspecialchars((string) $row['observacoes']);
+        echo ': ' . htmlspecialchars((string) $row['observacoes'], ENT_QUOTES, 'UTF-8');
     }
     echo "<br>";
 }

@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/security.php';
 require_login();
+if (is_production()) {
+    http_response_code(404);
+    exit('Página indisponível.');
+}
 /**
  * Informações de versão PHP
  * Utilidade para verificar a configuração do ambiente
@@ -26,21 +30,21 @@ require_login();
     <h2>Informações do Ambiente PHP</h2>
     <table>
         <tr><th>Propriedade</th><th>Valor</th></tr>
-        <tr><td>Versão PHP</td><td><?php echo htmlspecialchars(phpversion()); ?></td></tr>
-        <tr><td>Sistema Operativo</td><td><?php echo htmlspecialchars(PHP_OS); ?></td></tr>
-        <tr><td>SAPI</td><td><?php echo htmlspecialchars(php_sapi_name()); ?></td></tr>
+        <tr><td>Versão PHP</td><td><?php echo htmlspecialchars(phpversion(), ENT_QUOTES, 'UTF-8'); ?></td></tr>
+        <tr><td>Sistema Operativo</td><td><?php echo htmlspecialchars(PHP_OS, ENT_QUOTES, 'UTF-8'); ?></td></tr>
+        <tr><td>SAPI</td><td><?php echo htmlspecialchars(php_sapi_name(), ENT_QUOTES, 'UTF-8'); ?></td></tr>
         <tr>
             <td>Extensões carregadas</td>
             <td>
                 <?php
                 $extensoes = get_loaded_extensions();
                 sort($extensoes);
-                echo htmlspecialchars(implode(', ', $extensoes));
+                echo htmlspecialchars(implode(', ', $extensoes), ENT_QUOTES, 'UTF-8');
                 ?>
             </td>
         </tr>
-        <tr><td>Diretório de extensões</td><td><?php echo htmlspecialchars(ini_get('extension_dir')); ?></td></tr>
-        <tr><td>Ficheiro php.ini</td><td><?php echo htmlspecialchars(php_ini_loaded_file() ?: 'N/A'); ?></td></tr>
+        <tr><td>Diretório de extensões</td><td><?php echo htmlspecialchars(ini_get('extension_dir'), ENT_QUOTES, 'UTF-8'); ?></td></tr>
+        <tr><td>Ficheiro php.ini</td><td><?php echo htmlspecialchars(php_ini_loaded_file() ?: 'N/A', ENT_QUOTES, 'UTF-8'); ?></td></tr>
     </table>
     <a href="index.html" class="btn-voltar">Voltar ao Menu</a>
 </div>
