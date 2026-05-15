@@ -50,9 +50,13 @@ No **SQL Server Management Studio**, execute os scripts SQL pela seguinte ordem:
    ```ini
    DB_SERVER=SEU_SERVIDOR\SQLEXPRESS
    DB_NAME=NOME_DA_BASE_DE_DADOS
-   DB_USER=utilizador_bd
-   DB_PASSWORD=a_sua_password
-   DB_CHARSET=UTF-8
+DB_USER=utilizador_bd
+DB_PASSWORD=a_sua_password
+DB_CHARSET=UTF-8
+APP_ENV=production
+APP_USER=admin
+APP_PASSWORD_HASH=
+APP_PASSWORD=alterar_esta_password
    ```
 
 ### 4. Copiar os Ficheiros
@@ -96,6 +100,8 @@ gestao-junta/
 - **Prepared Statements SQLSRV** — Proteção contra SQL Injection
 - **`htmlspecialchars()`** em todos os outputs — Proteção contra XSS
 - **Validação de entrada** em todos os formulários PHP
+- **Sessão obrigatória** para páginas sensíveis e operações de gravação/eliminação
+- **Token CSRF** em formulários de escrita e eliminação
 
 ---
 
@@ -113,4 +119,3 @@ gestao-junta/
 ## 👤 Autor
 
 Desenvolvido no âmbito de estágio na [Junta de Freguesia da Lousã](https://www.freguesiadalousan.pt)
-

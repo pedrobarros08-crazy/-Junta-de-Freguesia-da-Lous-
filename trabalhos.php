@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/security.php';
+require_login();
 include 'config.php';
 
 // Carregar localidades da base de dados
@@ -35,9 +37,10 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trabalhos - Junta de Freguesia</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; box-sizing: border-box; }
         .container { background: white; padding: 20px; border-radius: 8px; max-width: 980px; margin: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
         label { font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; }
         select, input[type="text"], input[type="date"], textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
@@ -56,10 +59,20 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
         .success-message { color: #155724; background-color: #d4edda; padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none; }
         .error-message.show, .success-message.show { display: block; }
         .helper { margin-top: 10px; color: #666; }
+        .top-actions { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .btn-logout { background-color: #e67e22; color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 4px; }
+        @media (max-width: 700px) {
+            body { padding: 10px; }
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
+    <div class="top-actions">
+        <span>Utilizador: <?php echo htmlspecialchars(get_authenticated_username(), ENT_QUOTES, 'UTF-8'); ?></span>
+        <a class="btn-logout" href="signin.php?action=logout">Terminar sessão</a>
+    </div>
     <h2>Registo de Trabalhos por Localidade</h2>
 
     <div class="error-message<?php echo $status === 'error' ? ' show' : ''; ?>">
@@ -86,7 +99,8 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
     <?php else: ?>
         <h3 style="margin-top: 30px;">Novo Registo (<?php echo htmlspecialchars($localidadeSelecionada); ?>)</h3>
         <form action="gravar_trabalho.php" method="POST">
-            <input type="hidden" name="localidade_id" value="<?php echo $localidadeId; ?>">
+            <input type="hidden" name="localidade_id" value="<?php echo (int) $localidadeId; ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(get_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
 
             <label for="nome_rua">Rua:</label>
             <input type="text" id="nome_rua" name="nome_rua" required maxlength="255">
@@ -128,8 +142,9 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
                         <td><?php echo htmlspecialchars((string) $registo['observacoes']); ?></td>
                         <td>
                             <form method="POST" action="eliminar_trabalho.php" style="display:inline;" onsubmit="return confirm('Tem a certeza que deseja eliminar este registo?');">
-                                <input type="hidden" name="trabalho_id" value="<?php echo $registo['id']; ?>">
-                                <input type="hidden" name="localidade_id" value="<?php echo $localidadeId; ?>">
+                                <input type="hidden" name="trabalho_id" value="<?php echo (int) $registo['id']; ?>">
+                                <input type="hidden" name="localidade_id" value="<?php echo (int) $localidadeId; ?>">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(get_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                 <button type="submit" class="btn-delete">Eliminar</button>
                             </form>
                         </td>

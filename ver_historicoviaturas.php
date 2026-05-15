@@ -1,7 +1,12 @@
 <?php
+require_once __DIR__ . '/security.php';
+require_login();
 include 'config.php';
 
 $viaturaId = isset($_GET['viatura_id']) ? (int)$_GET['viatura_id'] : 0;
+if ($viaturaId <= 0) {
+    die("Erro: Viatura inválida.");
+}
 
 // Validar viatura na base de dados
 $sqlCheck = "SELECT id, nome FROM viaturas WHERE id = ?";
@@ -19,15 +24,13 @@ $params = [$viaturaId];
 $stmt = sqlsrv_prepare($conn, $sql, $params);
 
 if ($stmt === false) {
-    $errors = sqlsrv_errors();
-    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
-    die("Erro na preparação da query: " . htmlspecialchars($msg));
+    error_log('ver_historicoviaturas.php prepare falhou: ' . print_r(sqlsrv_errors(), true));
+    die("Erro interno ao carregar histórico.");
 }
 
 if (!sqlsrv_execute($stmt)) {
-    $errors = sqlsrv_errors();
-    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
-    die("Erro ao executar a query: " . htmlspecialchars($msg));
+    error_log('ver_historicoviaturas.php execute falhou: ' . print_r(sqlsrv_errors(), true));
+    die("Erro interno ao carregar histórico.");
 }
 
 echo "<table style='border-collapse: collapse; width: 100%;'>
@@ -60,6 +63,7 @@ if (!$temRegistos) {
 
 echo "</table>";
 
+sqlsrv_free_stmt($stmtCheck);
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
 ?>

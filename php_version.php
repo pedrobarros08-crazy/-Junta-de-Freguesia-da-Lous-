@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/security.php';
+require_login();
 /**
  * Informações de versão PHP
  * Utilidade para verificar a configuração do ambiente
@@ -8,6 +10,7 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Versão PHP</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }

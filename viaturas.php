@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/security.php';
+require_login();
 include 'config.php';
 
 // Carregar viaturas da base de dados
@@ -42,9 +44,10 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viaturas - Junta de Freguesia</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; box-sizing: border-box; }
         .container { max-width: 1100px; margin: auto; }
         .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
@@ -66,10 +69,20 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
         .resumo { margin-top: 12px; display: flex; gap: 25px; flex-wrap: wrap; }
         .btn-voltar { background-color: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; display: block; width: 100%; transition: 0.3s; }
         .btn-voltar:hover { background-color: #7f8c8d; }
+        .top-actions { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .btn-logout { background-color: #e67e22; color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 4px; }
+        @media (max-width: 700px) {
+            body { padding: 10px; }
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
+    <div class="box top-actions">
+        <span>Utilizador: <?php echo htmlspecialchars(get_authenticated_username(), ENT_QUOTES, 'UTF-8'); ?></span>
+        <a class="btn-logout" href="signin.php?action=logout">Terminar sessão</a>
+    </div>
     <div class="box">
         <h2>Viaturas</h2>
         <?php if ($status === 'error'): ?><div class="status-error"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
@@ -123,8 +136,9 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
                             <td><?php echo htmlspecialchars($registo['fornecedor']); ?></td>
                             <td>
                                 <form method="POST" action="eliminar_viatura.php" style="display:inline;" onsubmit="return confirm('Tem a certeza que deseja eliminar este registo?');">
-                                    <input type="hidden" name="manutencao_id" value="<?php echo $registo['id']; ?>">
-                                    <input type="hidden" name="viatura_id" value="<?php echo $viaturaId; ?>">
+                                    <input type="hidden" name="manutencao_id" value="<?php echo (int) $registo['id']; ?>">
+                                    <input type="hidden" name="viatura_id" value="<?php echo (int) $viaturaId; ?>">
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(get_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                     <button type="submit" class="btn-delete">Eliminar</button>
                                 </form>
                             </td>
@@ -146,7 +160,8 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
             <p>Selecione uma viatura para inserir um novo registo.</p>
         <?php else: ?>
             <form method="POST" action="gravar_viaturas.php">
-                <input type="hidden" name="viatura_id" value="<?php echo $viaturaId; ?>">
+                <input type="hidden" name="viatura_id" value="<?php echo (int) $viaturaId; ?>">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(get_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
 
                 <label for="data_servico">Data</label>
                 <input type="date" id="data_servico" name="data_servico" value="<?php echo date('Y-m-d'); ?>" required>

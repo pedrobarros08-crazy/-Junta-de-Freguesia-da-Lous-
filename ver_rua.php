@@ -1,8 +1,10 @@
 <?php
+require_once __DIR__ . '/security.php';
+require_login();
 include 'config.php';
 
 $localidadeId = isset($_GET['localidade_id']) ? (int)$_GET['localidade_id'] : 0;
-$nomeRua      = isset($_GET['rua'])           ? trim($_GET['rua'])           : '';
+$nomeRua      = sanitize_text_input($_GET['rua'] ?? '', 255);
 
 // Validar localidade na base de dados
 $sqlCheck = "SELECT id FROM localidades WHERE id = ?";
@@ -19,15 +21,13 @@ $params = [$localidadeId, $nomeRua];
 $stmt   = sqlsrv_prepare($conn, $sql, $params);
 
 if ($stmt === false) {
-    $errors = sqlsrv_errors();
-    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
-    die("Erro na preparação da query: " . htmlspecialchars($msg));
+    error_log('ver_rua.php prepare falhou: ' . print_r(sqlsrv_errors(), true));
+    die("Erro interno ao carregar dados.");
 }
 
 if (!sqlsrv_execute($stmt)) {
-    $errors = sqlsrv_errors();
-    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
-    die("Erro ao executar a query: " . htmlspecialchars($msg));
+    error_log('ver_rua.php execute falhou: ' . print_r(sqlsrv_errors(), true));
+    die("Erro interno ao carregar dados.");
 }
 
 $temRegistos = false;
@@ -48,5 +48,6 @@ if (!$temRegistos) {
 }
 
 sqlsrv_free_stmt($stmt);
+sqlsrv_free_stmt($stmtCheck);
 sqlsrv_close($conn);
 ?>

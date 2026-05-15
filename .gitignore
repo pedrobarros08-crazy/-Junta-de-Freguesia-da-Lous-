@@ -1,5 +1,8 @@
 # Ficheiro de credenciais - NUNCA versionar
 .env
+**/.env
+.env.*
+!.env.example
 
 # Dependências
 vendor/

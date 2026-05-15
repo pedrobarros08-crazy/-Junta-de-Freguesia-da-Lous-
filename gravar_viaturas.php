@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/security.php';
+require_login();
 include 'config.php';
 
 function redirect_with_message_viatura($viaturaId, $status, $message)
@@ -9,45 +11,66 @@ function redirect_with_message_viatura($viaturaId, $status, $message)
     exit;
 }
 
+function cleanup_sqlsrv($conn, ...$statements)
+{
+    foreach ($statements as $statement) {
+        if ($statement) {
+            sqlsrv_free_stmt($statement);
+        }
+    }
+    if ($conn) {
+        sqlsrv_close($conn);
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: viaturas.php');
     exit;
 }
 
+$stmtCheck = null;
+$stmt = null;
+
 $viaturaId = isset($_POST['viatura_id']) ? (int)$_POST['viatura_id'] : 0;
+
+if (!validate_csrf_token($_POST['csrf_token'] ?? null)) {
+    log_sensitive_action('viatura_create_rejected_csrf', ['viatura_id' => $viaturaId]);
+    cleanup_sqlsrv($conn);
+    redirect_with_message_viatura($viaturaId, 'error', 'Pedido inválido.');
+}
 
 // Validar viatura na base de dados
 $sqlCheck = "SELECT id FROM viaturas WHERE id = ?";
 $stmtCheck = sqlsrv_prepare($conn, $sqlCheck, [$viaturaId]);
 if ($stmtCheck === false || !sqlsrv_execute($stmtCheck) || !sqlsrv_fetch_array($stmtCheck)) {
+    cleanup_sqlsrv($conn, $stmtCheck);
     redirect_with_message_viatura(0, 'error', 'Viatura inválida.');
 }
 
 $dataServico = isset($_POST['data_servico']) ? trim($_POST['data_servico']) : '';
 $km          = isset($_POST['km'])           ? trim($_POST['km'])           : '';
-$intervencao = isset($_POST['intervencao'])  ? trim($_POST['intervencao'])  : '';
+$intervencao = sanitize_text_input($_POST['intervencao'] ?? '', 500);
 $valor       = isset($_POST['valor'])        ? trim($_POST['valor'])        : '';
-$fornecedor  = isset($_POST['fornecedor'])   ? trim($_POST['fornecedor'])   : '';
+$fornecedor  = sanitize_text_input($_POST['fornecedor'] ?? '', 255);
 
-$dataObj = DateTime::createFromFormat('Y-m-d', $dataServico);
-if (!$dataObj || $dataObj->format('Y-m-d') !== $dataServico) {
+if (!is_valid_date_not_future($dataServico)) {
+    cleanup_sqlsrv($conn, $stmtCheck);
     redirect_with_message_viatura($viaturaId, 'error', 'Data de serviço inválida.');
 }
 
 if ($intervencao === '' || $fornecedor === '') {
+    cleanup_sqlsrv($conn, $stmtCheck);
     redirect_with_message_viatura($viaturaId, 'error', 'Intervenção e fornecedor são obrigatórios.');
 }
 
 if (!is_numeric($km) || (int)$km < 0) {
+    cleanup_sqlsrv($conn, $stmtCheck);
     redirect_with_message_viatura($viaturaId, 'error', 'KM inválido.');
 }
 
-if (!is_numeric($valor) || (float)$valor < 0) {
+if (!is_numeric($valor) || (float)$valor <= 0) {
+    cleanup_sqlsrv($conn, $stmtCheck);
     redirect_with_message_viatura($viaturaId, 'error', 'Valor inválido.');
-}
-
-if (mb_strlen($intervencao, 'UTF-8') > 500 || mb_strlen($fornecedor, 'UTF-8') > 255) {
-    redirect_with_message_viatura($viaturaId, 'error', 'Um ou mais campos excedem o tamanho permitido.');
 }
 
 $sql = "INSERT INTO manutencoes_viaturas (id_viatura, data_servico, km, intervencao, valor, fornecedor) VALUES (?, ?, ?, ?, ?, ?)";
@@ -55,15 +78,16 @@ $params = [$viaturaId, $dataServico, (int)$km, $intervencao, (float)$valor, $for
 $stmt = sqlsrv_prepare($conn, $sql, $params);
 
 if ($stmt === false) {
+    cleanup_sqlsrv($conn, $stmtCheck);
     redirect_with_message_viatura($viaturaId, 'error', 'Erro interno ao preparar o registo.');
 }
 
 if (sqlsrv_execute($stmt)) {
-    sqlsrv_free_stmt($stmt);
-    sqlsrv_close($conn);
+    log_sensitive_action('viatura_registo_created', ['viatura_id' => $viaturaId, 'fornecedor' => $fornecedor]);
+    cleanup_sqlsrv($conn, $stmt, $stmtCheck);
     redirect_with_message_viatura($viaturaId, 'success', 'Registo guardado com sucesso.');
 }
 
-sqlsrv_free_stmt($stmt);
-sqlsrv_close($conn);
+log_sensitive_action('viatura_registo_create_failed', ['viatura_id' => $viaturaId]);
+cleanup_sqlsrv($conn, $stmt, $stmtCheck);
 redirect_with_message_viatura($viaturaId, 'error', 'Erro ao guardar o registo.');
