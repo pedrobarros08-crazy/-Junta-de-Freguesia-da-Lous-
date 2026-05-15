@@ -60,7 +60,7 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
         .error-message.show, .success-message.show { display: block; }
         .helper { margin-top: 10px; color: #666; }
         .top-actions { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-        .btn-logout { background-color: #e67e22; color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 4px; }
+        .btn-logout { background-color: #e67e22; color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 4px; border: none; cursor: pointer; font: inherit; }
         @media (max-width: 700px) {
             body { padding: 10px; }
             table { display: block; overflow-x: auto; white-space: nowrap; }
@@ -71,7 +71,11 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
 <div class="container">
     <div class="top-actions">
         <span>Utilizador: <?php echo htmlspecialchars(get_authenticated_username(), ENT_QUOTES, 'UTF-8'); ?></span>
-        <a class="btn-logout" href="signin.php?action=logout">Terminar sessão</a>
+        <form method="POST" action="signin.php" style="margin:0;">
+            <input type="hidden" name="action" value="logout">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(get_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+            <button type="submit" class="btn-logout">Terminar sessão</button>
+        </form>
     </div>
     <h2>Registo de Trabalhos por Localidade</h2>
 

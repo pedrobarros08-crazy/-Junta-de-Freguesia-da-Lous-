@@ -5,16 +5,21 @@ $next = safe_next_path($_GET['next'] ?? 'viaturas.php');
 $status = '';
 $message = '';
 
-if (isset($_GET['action']) && $_GET['action'] === 'logout') {
-    if (is_authenticated()) {
-        log_sensitive_action('logout', ['username' => get_authenticated_username()]);
-    }
-    logout_user();
-    header('Location: signin.php?status=success&message=' . urlencode('Sessão terminada com sucesso.'));
-    exit;
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? 'login';
+    if ($action === 'logout') {
+        if (!validate_csrf_token($_POST['csrf_token'] ?? null)) {
+            header('Location: signin.php?status=error&message=' . urlencode('Pedido inválido. Tente novamente.'));
+            exit;
+        }
+        if (is_authenticated()) {
+            log_sensitive_action('logout', ['username' => get_authenticated_username()]);
+        }
+        logout_user();
+        header('Location: signin.php?status=success&message=' . urlencode('Sessão terminada com sucesso.'));
+        exit;
+    }
+
     if (!validate_csrf_token($_POST['csrf_token'] ?? null)) {
         $status = 'error';
         $message = 'Pedido inválido. Tente novamente.';
