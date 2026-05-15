@@ -50,13 +50,14 @@ No **SQL Server Management Studio**, execute os scripts SQL pela seguinte ordem:
    ```ini
    DB_SERVER=SEU_SERVIDOR\SQLEXPRESS
    DB_NAME=NOME_DA_BASE_DE_DADOS
-DB_USER=utilizador_bd
-DB_PASSWORD=a_sua_password
-DB_CHARSET=UTF-8
-APP_ENV=production
-APP_USER=admin
-APP_PASSWORD_HASH=
-APP_PASSWORD=alterar_esta_password
+   DB_USER=utilizador_bd
+   DB_PASSWORD=a_sua_password
+   DB_CHARSET=UTF-8
+   APP_ENV=production
+   APP_USER=admin
+   APP_USER_ID=1
+   APP_PASSWORD_HASH=
+   APP_PASSWORD=alterar_esta_password
    ```
 
 ### 4. Copiar os Ficheiros

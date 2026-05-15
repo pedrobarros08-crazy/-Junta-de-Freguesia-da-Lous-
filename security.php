@@ -141,7 +141,8 @@ function authenticate_credentials(string $username, string $password): bool
 function login_user(string $username): void
 {
     session_regenerate_id(true);
-    $_SESSION['user_id'] = crc32($username);
+    $configuredUserId = filter_var(getenv('APP_USER_ID'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+    $_SESSION['user_id'] = $configuredUserId !== false ? (int) $configuredUserId : 1;
     $_SESSION['username'] = $username;
     get_csrf_token();
 }

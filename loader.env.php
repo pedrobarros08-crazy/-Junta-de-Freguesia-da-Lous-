@@ -25,6 +25,7 @@ if (file_exists($envFile)) {
             $value = trim($value);
 
             if (!preg_match('/^[A-Z_][A-Z0-9_]*$/', $name)) {
+                error_log('loader.env.php: variável de ambiente inválida ignorada: ' . $name);
                 continue;
             }
 
