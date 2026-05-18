@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/security.php';
+require_login();
 include 'config.php';
 
 // Carregar viaturas da base de dados
@@ -42,9 +44,10 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viaturas - Junta de Freguesia</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; box-sizing: border-box; }
         .container { max-width: 1100px; margin: auto; }
         .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
@@ -66,19 +69,33 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
         .resumo { margin-top: 12px; display: flex; gap: 25px; flex-wrap: wrap; }
         .btn-voltar { background-color: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; display: block; width: 100%; transition: 0.3s; }
         .btn-voltar:hover { background-color: #7f8c8d; }
+        .top-actions { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .btn-logout { background-color: #e67e22; color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 4px; border: none; cursor: pointer; font: inherit; }
+        @media (max-width: 700px) {
+            body { padding: 10px; }
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
+    <div class="box top-actions">
+        <span>Utilizador: <?php echo htmlspecialchars(get_authenticated_username(), ENT_QUOTES, 'UTF-8'); ?></span>
+        <form method="POST" action="signin.php" style="margin:0;">
+            <input type="hidden" name="action" value="logout">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(get_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+            <button type="submit" class="btn-logout">Terminar sessão</button>
+        </form>
+    </div>
     <div class="box">
         <h2>Viaturas</h2>
-        <?php if ($status === 'error'): ?><div class="status-error"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
-        <?php if ($status === 'success'): ?><div class="status-success"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
+        <?php if ($status === 'error'): ?><div class="status-error"><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
+        <?php if ($status === 'success'): ?><div class="status-success"><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
 
         <div class="grid">
             <?php foreach ($viaturas as $id => $nome): ?>
                 <a class="btn-viatura<?php echo $viaturaId === $id ? ' active' : ''; ?>" href="viaturas.php?viatura_id=<?php echo $id; ?>">
-                    <?php echo htmlspecialchars($nome); ?>
+                    <?php echo htmlspecialchars($nome, ENT_QUOTES, 'UTF-8'); ?>
                 </a>
             <?php endforeach; ?>
         </div>
@@ -116,15 +133,16 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
                         ?>
                         <tr>
                             <td><?php echo (int) $registo['id']; ?></td>
-                            <td><?php echo htmlspecialchars($data); ?></td>
-                            <td><?php echo htmlspecialchars((string) $registo['km']); ?></td>
-                            <td><?php echo htmlspecialchars($registo['intervencao']); ?></td>
-                            <td><?php echo htmlspecialchars(number_format((float) $registo['valor'], 2, ',', '.')) . ' €'; ?></td>
-                            <td><?php echo htmlspecialchars($registo['fornecedor']); ?></td>
+                            <td><?php echo htmlspecialchars($data, ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars((string) $registo['km'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars($registo['intervencao'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars(number_format((float) $registo['valor'], 2, ',', '.'), ENT_QUOTES, 'UTF-8') . ' €'; ?></td>
+                            <td><?php echo htmlspecialchars($registo['fornecedor'], ENT_QUOTES, 'UTF-8'); ?></td>
                             <td>
                                 <form method="POST" action="eliminar_viatura.php" style="display:inline;" onsubmit="return confirm('Tem a certeza que deseja eliminar este registo?');">
-                                    <input type="hidden" name="manutencao_id" value="<?php echo $registo['id']; ?>">
-                                    <input type="hidden" name="viatura_id" value="<?php echo $viaturaId; ?>">
+                                    <input type="hidden" name="manutencao_id" value="<?php echo (int) $registo['id']; ?>">
+                                    <input type="hidden" name="viatura_id" value="<?php echo (int) $viaturaId; ?>">
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(get_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                     <button type="submit" class="btn-delete">Eliminar</button>
                                 </form>
                             </td>
@@ -134,8 +152,8 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
                 </tbody>
             </table>
             <div class="resumo">
-                <strong>Despesa Total: <?php echo htmlspecialchars(number_format($despesaTotal, 2, ',', '.')); ?> €</strong>
-                <strong>Total c/IVA (23%): <?php echo htmlspecialchars(number_format($totalComIva, 2, ',', '.')); ?> €</strong>
+                <strong>Despesa Total: <?php echo htmlspecialchars(number_format($despesaTotal, 2, ',', '.'), ENT_QUOTES, 'UTF-8'); ?> €</strong>
+                <strong>Total c/IVA (23%): <?php echo htmlspecialchars(number_format($totalComIva, 2, ',', '.'), ENT_QUOTES, 'UTF-8'); ?> €</strong>
             </div>
         <?php endif; ?>
     </div>
@@ -146,7 +164,8 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
             <p>Selecione uma viatura para inserir um novo registo.</p>
         <?php else: ?>
             <form method="POST" action="gravar_viaturas.php">
-                <input type="hidden" name="viatura_id" value="<?php echo $viaturaId; ?>">
+                <input type="hidden" name="viatura_id" value="<?php echo (int) $viaturaId; ?>">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(get_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
 
                 <label for="data_servico">Data</label>
                 <input type="date" id="data_servico" name="data_servico" value="<?php echo date('Y-m-d'); ?>" required>

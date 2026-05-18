@@ -7,6 +7,12 @@
 $envFile = __DIR__ . '/.env';
 
 if (file_exists($envFile)) {
+    // Cache opcional (desativado por padrão):
+    // static $alreadyLoaded = false;
+    // if ($alreadyLoaded) {
+    //     return;
+    // }
+
     $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
         // Ignorar comentários
@@ -14,9 +20,15 @@ if (file_exists($envFile)) {
             continue;
         }
         if (strpos($line, '=') !== false) {
-            list($name, $value) = explode('=', $line, 2);
+            [$name, $value] = explode('=', $line, 2);
             $name  = trim($name);
             $value = trim($value);
+
+            if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $name)) {
+                error_log('loader.env.php: variável de ambiente inválida ignorada: ' . $name);
+                continue;
+            }
+
             // Remover aspas opcionais à volta do valor
             $value = trim($value, '"\'');
             if (!empty($name)) {
@@ -25,5 +37,7 @@ if (file_exists($envFile)) {
             }
         }
     }
+
+    // $alreadyLoaded = true;
 }
 ?>

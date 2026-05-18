@@ -1,7 +1,12 @@
 <?php
+require_once __DIR__ . '/security.php';
+require_login();
 include 'config.php';
 
 $localidadeId = isset($_GET['localidade_id']) ? (int)$_GET['localidade_id'] : 0;
+if ($localidadeId <= 0) {
+    die('Erro: Localidade inválida.');
+}
 
 // Validar localidade na base de dados
 $sqlCheck = "SELECT id, nome FROM localidades WHERE id = ?";
@@ -19,21 +24,20 @@ $params = [$localidadeId];
 $stmt = sqlsrv_prepare($conn, $sql, $params);
 
 if ($stmt === false) {
-    $errors = sqlsrv_errors();
-    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
-    die("Erro na preparação da query: " . htmlspecialchars($msg));
+    error_log('ver_historico.php prepare falhou: ' . print_r(sqlsrv_errors(), true));
+    die('Erro interno ao carregar histórico.');
 }
 
 if (!sqlsrv_execute($stmt)) {
-    $errors = sqlsrv_errors();
-    $msg = isset($errors[0]['message']) ? $errors[0]['message'] : 'Erro desconhecido';
-    die("Erro ao executar a query: " . htmlspecialchars($msg));
+    error_log('ver_historico.php execute falhou: ' . print_r(sqlsrv_errors(), true));
+    die('Erro interno ao carregar histórico.');
 }
 ?>
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Histórico de Trabalhos - <?php echo htmlspecialchars($localidadeRow['nome']); ?></title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
@@ -66,15 +70,19 @@ if (!sqlsrv_execute($stmt)) {
         $temRegistos = false;
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             $temRegistos = true;
-            $data = $row['data_trabalho'] instanceof DateTime
-                ? $row['data_trabalho']->format('d/m/Y')
-                : date('d/m/Y', strtotime((string)$row['data_trabalho']));
+    if ($row['data_trabalho'] instanceof DateTime) {
+        $data = $row['data_trabalho']->format('d/m/Y');
+    } else {
+        $rawDate = (string) $row['data_trabalho'];
+        $ts = strtotime($rawDate);
+        $data = $ts !== false ? date('d/m/Y', $ts) : $rawDate;
+    }
             ?>
             <tr>
-                <td><?php echo htmlspecialchars($row['nome_rua']); ?></td>
-                <td><?php echo htmlspecialchars($data); ?></td>
-                <td><?php echo htmlspecialchars($row['tipo_trabalho']); ?></td>
-                <td><?php echo htmlspecialchars((string) $row['observacoes']); ?></td>
+                <td><?php echo htmlspecialchars($row['nome_rua'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td><?php echo htmlspecialchars($data, ENT_QUOTES, 'UTF-8'); ?></td>
+                <td><?php echo htmlspecialchars($row['tipo_trabalho'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td><?php echo htmlspecialchars((string) $row['observacoes'], ENT_QUOTES, 'UTF-8'); ?></td>
             </tr>
             <?php
         }
