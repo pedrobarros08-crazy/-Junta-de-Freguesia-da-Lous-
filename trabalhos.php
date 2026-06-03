@@ -39,18 +39,14 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trabalhos - Junta de Freguesia</title>
+    <link rel="stylesheet" href="common.css">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; box-sizing: border-box; }
         .container { background: white; padding: 20px; border-radius: 8px; max-width: 980px; margin: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
         label { font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; }
         select, input[type="text"], input[type="date"], textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         textarea { min-height: 80px; resize: vertical; }
         .btn-gravar { background-color: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; width: 100%; transition: 0.3s; }
         .btn-gravar:hover { background-color: #27ae60; }
-        .btn-voltar { background-color: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; display: block; width: 100%; transition: 0.3s; }
-        .btn-voltar:hover { background-color: #7f8c8d; }
-        .btn-delete { background-color: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: 0.3s; }
-        .btn-delete:hover { background-color: #c0392b; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background-color: #2c3e50; color: white; }
@@ -59,12 +55,6 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
         .success-message { color: #155724; background-color: #d4edda; padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none; }
         .error-message.show, .success-message.show { display: block; }
         .helper { margin-top: 10px; color: #666; }
-        .top-actions { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-        .btn-logout { background-color: #e67e22; color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 4px; border: none; cursor: pointer; font: inherit; }
-        @media (max-width: 700px) {
-            body { padding: 10px; }
-            table { display: block; overflow-x: auto; white-space: nowrap; }
-        }
     </style>
 </head>
 <body>

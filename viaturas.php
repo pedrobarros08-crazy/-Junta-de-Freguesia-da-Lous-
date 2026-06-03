@@ -46,8 +46,8 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viaturas - Junta de Freguesia</title>
+    <link rel="stylesheet" href="common.css">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; box-sizing: border-box; }
         .container { max-width: 1100px; margin: auto; }
         .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
@@ -64,17 +64,7 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
         textarea { min-height: 80px; resize: vertical; }
         .btn-submit { margin-top: 15px; width: 100%; padding: 10px; border: none; border-radius: 4px; background: #2ecc71; color: white; font-weight: 700; cursor: pointer; }
         .btn-submit:hover { background-color: #27ae60; }
-        .btn-delete { background-color: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: 0.3s; }
-        .btn-delete:hover { background-color: #c0392b; }
         .resumo { margin-top: 12px; display: flex; gap: 25px; flex-wrap: wrap; }
-        .btn-voltar { background-color: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; display: block; width: 100%; transition: 0.3s; }
-        .btn-voltar:hover { background-color: #7f8c8d; }
-        .top-actions { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-        .btn-logout { background-color: #e67e22; color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 4px; border: none; cursor: pointer; font: inherit; }
-        @media (max-width: 700px) {
-            body { padding: 10px; }
-            table { display: block; overflow-x: auto; white-space: nowrap; }
-        }
     </style>
 </head>
 <body>
