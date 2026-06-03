@@ -1,20 +1,27 @@
 <?php
 require_once __DIR__ . '/security.php';
 
+// Mostrar erros em ambiente de desenvolvimento para facilitar depuração
+if (!is_production()) {
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+    error_reporting(E_ALL);
+}
+
 // Verificar se a extensão SQLSRV está carregada
 if (!extension_loaded('sqlsrv')) {
     die("Erro: A extensão SQLSRV não está instalada. Consulte o README.md para instruções de instalação.");
 }
 
-$serverName = getenv('DB_SERVER');
+$serverName = getenv('DB_SERVER') ?: 'JFLVILARINHO\SQLEXPRESS';
 if (!$serverName) {
     die("Erro: variável de ambiente DB_SERVER não configurada. Consulte o ficheiro .env.example.");
 }
 
 $connectionOptions = [
-    "Database"     => getenv('DB_NAME') ?: '',
-    "Uid"          => getenv('DB_USER') ?: '',
-    "PWD"          => getenv('DB_PASSWORD') ?: '',
+    "Database"     => getenv('DB_NAME') ?: 'ACCESS APLICAÇÃO',
+    "Uid"          => getenv('DB_USER') ?: 'Aplicação User',
+    "PWD"          => getenv('DB_PASSWORD') ?: 'JFLousan#2026',
     "CharacterSet" => getenv('DB_CHARSET') ?: 'UTF-8',
 ];
 
