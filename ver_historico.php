@@ -3,35 +3,25 @@ require_once __DIR__ . '/security.php';
 require_login();
 include 'config.php';
 
-$localidadeId = isset($_GET['localidade_id']) ? (int)$_GET['localidade_id'] : 0;
+$localidadeId = get_positive_int($_GET['localidade_id'] ?? 0);
 if ($localidadeId <= 0) {
     die('Erro: Localidade inválida.');
 }
 
-// Validar localidade na base de dados
-$sqlCheck = "SELECT id, nome FROM localidades WHERE id = ?";
-$stmtCheck = sqlsrv_prepare($conn, $sqlCheck, [$localidadeId]);
-if ($stmtCheck === false || !sqlsrv_execute($stmtCheck)) {
-    die("Erro: Localidade inválida.");
-}
-$localidadeRow = sqlsrv_fetch_array($stmtCheck, SQLSRV_FETCH_ASSOC);
-if (!$localidadeRow) {
-    die("Erro: Localidade inválida.");
-}
+$localidadeRow = fetch_one_assoc_or_fail(
+    $conn,
+    "SELECT id, nome FROM localidades WHERE id = ?",
+    [$localidadeId],
+    'Erro: Localidade inválida.'
+);
 
-$sql  = "SELECT id, nome_rua, data_trabalho, tipo_trabalho, observacoes FROM trabalhos WHERE id_localidade = ? ORDER BY data_trabalho DESC, id DESC";
-$params = [$localidadeId];
-$stmt = sqlsrv_prepare($conn, $sql, $params);
-
-if ($stmt === false) {
-    error_log('ver_historico.php prepare falhou: ' . print_r(sqlsrv_errors(), true));
-    die('Erro interno ao carregar histórico.');
-}
-
-if (!sqlsrv_execute($stmt)) {
-    error_log('ver_historico.php execute falhou: ' . print_r(sqlsrv_errors(), true));
-    die('Erro interno ao carregar histórico.');
-}
+$stmt = prepare_and_execute_or_fail(
+    $conn,
+    "SELECT id, nome_rua, data_trabalho, tipo_trabalho, observacoes FROM trabalhos WHERE id_localidade = ? ORDER BY data_trabalho DESC, id DESC",
+    [$localidadeId],
+    'ver_historico.php',
+    'Erro interno ao carregar histórico.'
+);
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -94,6 +84,5 @@ if (!sqlsrv_execute($stmt)) {
 </html>
 <?php
 sqlsrv_free_stmt($stmt);
-sqlsrv_free_stmt($stmtCheck);
 sqlsrv_close($conn);
 ?>

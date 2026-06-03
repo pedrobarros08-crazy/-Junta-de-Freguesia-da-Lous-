@@ -3,35 +3,25 @@ require_once __DIR__ . '/security.php';
 require_login();
 include 'config.php';
 
-$viaturaId = isset($_GET['viatura_id']) ? (int)$_GET['viatura_id'] : 0;
+$viaturaId = get_positive_int($_GET['viatura_id'] ?? 0);
 if ($viaturaId <= 0) {
     die("Erro: Viatura inválida.");
 }
 
-// Validar viatura na base de dados
-$sqlCheck = "SELECT id, nome FROM viaturas WHERE id = ?";
-$stmtCheck = sqlsrv_prepare($conn, $sqlCheck, [$viaturaId]);
-if ($stmtCheck === false || !sqlsrv_execute($stmtCheck)) {
-    die("Erro: Viatura inválida.");
-}
-$viaturaRow = sqlsrv_fetch_array($stmtCheck, SQLSRV_FETCH_ASSOC);
-if (!$viaturaRow) {
-    die("Erro: Viatura inválida.");
-}
+fetch_one_assoc_or_fail(
+    $conn,
+    "SELECT id, nome FROM viaturas WHERE id = ?",
+    [$viaturaId],
+    'Erro: Viatura inválida.'
+);
 
-$sql  = "SELECT id, data_servico, km, intervencao, valor, fornecedor FROM manutencoes_viaturas WHERE id_viatura = ? ORDER BY data_servico DESC, id DESC";
-$params = [$viaturaId];
-$stmt = sqlsrv_prepare($conn, $sql, $params);
-
-if ($stmt === false) {
-    error_log('ver_historicoviaturas.php prepare falhou: ' . print_r(sqlsrv_errors(), true));
-    die("Erro interno ao carregar histórico.");
-}
-
-if (!sqlsrv_execute($stmt)) {
-    error_log('ver_historicoviaturas.php execute falhou: ' . print_r(sqlsrv_errors(), true));
-    die("Erro interno ao carregar histórico.");
-}
+$stmt = prepare_and_execute_or_fail(
+    $conn,
+    "SELECT id, data_servico, km, intervencao, valor, fornecedor FROM manutencoes_viaturas WHERE id_viatura = ? ORDER BY data_servico DESC, id DESC",
+    [$viaturaId],
+    'ver_historicoviaturas.php',
+    'Erro interno ao carregar histórico.'
+);
 
 echo "<table style='border-collapse: collapse; width: 100%;'>
         <tr style='background-color: #333; color: white;'>
@@ -61,7 +51,6 @@ if (!$temRegistos) {
 
 echo "</table>";
 
-sqlsrv_free_stmt($stmtCheck);
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
 ?>

@@ -63,3 +63,45 @@ function render_user_session_actions(): void
     </form>
     <?php
 }
+
+function get_positive_int($value): int
+{
+    $parsed = (int) $value;
+    return $parsed > 0 ? $parsed : 0;
+}
+
+function fetch_one_assoc_or_fail($conn, string $sql, array $params, string $publicErrorMessage)
+{
+    $stmt = sqlsrv_prepare($conn, $sql, $params);
+    if ($stmt === false || !sqlsrv_execute($stmt)) {
+        cleanup_sqlsrv($conn, $stmt);
+        die($publicErrorMessage);
+    }
+
+    $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+    sqlsrv_free_stmt($stmt);
+    if (!$row) {
+        cleanup_sqlsrv($conn);
+        die($publicErrorMessage);
+    }
+
+    return $row;
+}
+
+function prepare_and_execute_or_fail($conn, string $sql, array $params, string $logPrefix, string $publicErrorMessage)
+{
+    $stmt = sqlsrv_prepare($conn, $sql, $params);
+    if ($stmt === false) {
+        error_log($logPrefix . ' prepare falhou: ' . print_r(sqlsrv_errors(), true));
+        cleanup_sqlsrv($conn);
+        die($publicErrorMessage);
+    }
+
+    if (!sqlsrv_execute($stmt)) {
+        error_log($logPrefix . ' execute falhou: ' . print_r(sqlsrv_errors(), true));
+        cleanup_sqlsrv($conn, $stmt);
+        die($publicErrorMessage);
+    }
+
+    return $stmt;
+}
