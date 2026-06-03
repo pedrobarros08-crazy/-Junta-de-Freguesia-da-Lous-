@@ -1,10 +1,21 @@
 <?php
-require_once __DIR__ . '/loader.env.php';
+require_once __DIR__ . '/security.php';
+require_login();
+
+if (is_production()) {
+    http_response_code(404);
+    exit('Página indisponível.');
+}
+
 // Enhanced SQLSRV connection test using environment variables from .env
-$serverEnv = getenv('DB_SERVER') ?: 'JFLVILARINHO\\SQLEXPRESS';
-$db     = getenv('DB_NAME') ?: 'ACCESS APLICAÇÃO';
-$user   = getenv('DB_USER') ?: 'Aplicação User';
-$pwd    = getenv('DB_PASSWORD') ?: '';
+$serverEnv = trim((string) getenv('DB_SERVER'));
+$db = trim((string) getenv('DB_NAME'));
+$user = trim((string) getenv('DB_USER'));
+$pwd = (string) getenv('DB_PASSWORD');
+$charset = trim((string) getenv('DB_CHARSET'));
+if ($charset === '') {
+    $charset = 'UTF-8';
+}
 
 header('Content-Type: text/plain; charset=utf-8');
 
@@ -13,6 +24,12 @@ echo "Testing SQLSRV connection diagnostics...\n\n";
 if (!function_exists('sqlsrv_connect')) {
     echo "ERROR: sqlsrv_connect() not available. The SQLSRV extension is not loaded.\n";
     echo "Check php.ini and ensure the sqlsrv/pdo_sqlsrv DLLs are installed in the PHP ext directory.\n";
+    exit(1);
+}
+
+if ($serverEnv === '' || $db === '' || $user === '' || $pwd === '') {
+    echo "ERROR: Missing required DB environment variables.\n";
+    echo "Required: DB_SERVER, DB_NAME, DB_USER, DB_PASSWORD\n";
     exit(1);
 }
 
@@ -36,9 +53,9 @@ foreach ($candidates as $s) {
 
     // Try with different encrypt/trust options to diagnose TLS/prelogin issues
     $optionsList = [
-        ['Database' => $db, 'Uid' => $user, 'PWD' => $pwd, 'CharacterSet' => 'UTF-8', 'Encrypt' => false, 'TrustServerCertificate' => true],
-        ['Database' => $db, 'Uid' => $user, 'PWD' => $pwd, 'CharacterSet' => 'UTF-8', 'Encrypt' => true,  'TrustServerCertificate' => true],
-        ['Database' => $db, 'Uid' => $user, 'PWD' => $pwd, 'CharacterSet' => 'UTF-8']
+        ['Database' => $db, 'Uid' => $user, 'PWD' => $pwd, 'CharacterSet' => $charset, 'Encrypt' => false, 'TrustServerCertificate' => true],
+        ['Database' => $db, 'Uid' => $user, 'PWD' => $pwd, 'CharacterSet' => $charset, 'Encrypt' => true,  'TrustServerCertificate' => true],
+        ['Database' => $db, 'Uid' => $user, 'PWD' => $pwd, 'CharacterSet' => $charset]
     ];
 
     foreach ($optionsList as $opts) {

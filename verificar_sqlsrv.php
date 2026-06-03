@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/security.php';
 require_login();
+if (is_production()) {
+    http_response_code(404);
+    exit('Página indisponível.');
+}
 /**
  * Verificação do driver SQLSRV
  * Utilidade para diagnosticar problemas de ligação à base de dados
