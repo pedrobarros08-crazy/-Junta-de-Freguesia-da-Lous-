@@ -3,10 +3,7 @@ require_once __DIR__ . '/security.php';
 require_login();
 include 'config.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: viaturas.php');
-    exit;
-}
+require_post_request_or_redirect('viaturas.php');
 
 $manutencaoId = isset($_POST['manutencao_id']) ? (int)$_POST['manutencao_id'] : 0;
 $viaturaId = isset($_POST['viatura_id']) ? (int)$_POST['viatura_id'] : 0;

@@ -3,10 +3,7 @@ require_once __DIR__ . '/security.php';
 require_login();
 include 'config.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: trabalhos.php');
-    exit;
-}
+require_post_request_or_redirect('trabalhos.php');
 
 $trabalhoId = isset($_POST['trabalho_id']) ? (int)$_POST['trabalho_id'] : 0;
 $localidadeId = isset($_POST['localidade_id']) ? (int)$_POST['localidade_id'] : 0;

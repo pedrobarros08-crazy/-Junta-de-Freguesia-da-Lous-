@@ -16,9 +16,7 @@ if ($resViaturas !== false) {
 $viaturaId = isset($_GET['viatura_id']) ? (int)$_GET['viatura_id'] : 0;
 $viaturaValida = isset($viaturas[$viaturaId]);
 
-$status = isset($_GET['status']) ? $_GET['status'] : '';
-$status = in_array($status, ['success', 'error'], true) ? $status : '';
-$message = isset($_GET['message']) ? $_GET['message'] : '';
+[$status, $message] = get_status_and_message_from_query();
 
 $historico = [];
 $despesaTotal = 0.0;
@@ -70,12 +68,7 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
 <body>
 <div class="container">
     <div class="box top-actions">
-        <span>Utilizador: <?php echo htmlspecialchars(get_authenticated_username(), ENT_QUOTES, 'UTF-8'); ?></span>
-        <form method="POST" action="signin.php" style="margin:0;">
-            <input type="hidden" name="action" value="logout">
-            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(get_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-            <button type="submit" class="btn-logout">Terminar sessão</button>
-        </form>
+        <?php render_user_session_actions(); ?>
     </div>
     <div class="box">
         <h2>Viaturas</h2>

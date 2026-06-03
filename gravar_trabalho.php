@@ -3,10 +3,7 @@ require_once __DIR__ . '/security.php';
 require_login();
 include 'config.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: trabalhos.php');
-    exit;
-}
+require_post_request_or_redirect('trabalhos.php');
 
 $stmtCheck = null;
 $stmt = null;
