@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/security.php';
 require_login();
-include 'config.php';
+require_once __DIR__ . '/config.php';
 
 $viaturaId = get_positive_int($_GET['viatura_id'] ?? 0);
 if ($viaturaId <= 0) {

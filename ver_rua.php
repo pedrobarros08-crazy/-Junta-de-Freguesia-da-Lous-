@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/security.php';
 require_login();
-include 'config.php';
+require_once __DIR__ . '/config.php';
 
 $localidadeId = get_positive_int($_GET['localidade_id'] ?? 0);
 $nomeRua      = sanitize_text_input($_GET['rua'] ?? '', 255);

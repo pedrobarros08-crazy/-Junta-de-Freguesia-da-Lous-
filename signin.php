@@ -43,8 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($status === '' && isset($_GET['status'])) {
-    $status = $_GET['status'] === 'success' ? 'success' : 'error';
-    $message = sanitize_text_input($_GET['message'] ?? '', 255);
+    $queryStatus = (string) $_GET['status'];
+    if (in_array($queryStatus, ['success', 'error'], true)) {
+        $status = $queryStatus;
+        $message = sanitize_text_input($_GET['message'] ?? '', 255);
+    }
 }
 
 if (is_authenticated()) {

@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/security.php';
 require_login();
-include 'config.php';
+require_once __DIR__ . '/config.php';
 
 // Carregar localidades da base de dados
 $sqlLocalidades = "SELECT id, nome FROM localidades ORDER BY nome";

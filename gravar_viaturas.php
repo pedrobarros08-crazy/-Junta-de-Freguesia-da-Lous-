@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/security.php';
 require_login();
-include 'config.php';
+require_once __DIR__ . '/config.php';
 
 require_post_request_or_redirect('viaturas.php');
 

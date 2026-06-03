@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/security.php';
 require_login();
-include 'config.php';
+require_once __DIR__ . '/config.php';
 
 // Carregar viaturas da base de dados
 $sqlViaturas = "SELECT id, nome FROM viaturas ORDER BY nome";
