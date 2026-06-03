@@ -70,13 +70,7 @@ if (!sqlsrv_execute($stmt)) {
         $temRegistos = false;
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             $temRegistos = true;
-    if ($row['data_trabalho'] instanceof DateTime) {
-        $data = $row['data_trabalho']->format('d/m/Y');
-    } else {
-        $rawDate = (string) $row['data_trabalho'];
-        $ts = strtotime($rawDate);
-        $data = $ts !== false ? date('d/m/Y', $ts) : $rawDate;
-    }
+            $data = format_sqlsrv_date($row['data_trabalho']);
             ?>
             <tr>
                 <td><?php echo htmlspecialchars($row['nome_rua'], ENT_QUOTES, 'UTF-8'); ?></td>

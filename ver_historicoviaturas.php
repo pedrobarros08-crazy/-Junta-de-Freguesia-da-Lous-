@@ -45,13 +45,7 @@ echo "<table style='border-collapse: collapse; width: 100%;'>
 $temRegistos = false;
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     $temRegistos = true;
-    if ($row['data_servico'] instanceof DateTime) {
-        $data = $row['data_servico']->format('d/m/Y');
-    } else {
-        $rawDate = (string) $row['data_servico'];
-        $ts = strtotime($rawDate);
-        $data = $ts !== false ? date('d/m/Y', $ts) : $rawDate;
-    }
+    $data = format_sqlsrv_date($row['data_servico']);
     echo "<tr style='border-bottom: 1px solid #ddd;'>
             <td style='padding: 10px;'>" . htmlspecialchars($data, ENT_QUOTES, 'UTF-8') . "</td>
             <td style='padding: 10px;'>" . htmlspecialchars((string) $row['km'], ENT_QUOTES, 'UTF-8') . " km</td>

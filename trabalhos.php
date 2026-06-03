@@ -131,14 +131,7 @@ if ($localidadeId > 0 && $localidadeSelecionada !== '') {
                 <tr><td colspan="5" style="text-align:center;">Sem registos para esta localidade.</td></tr>
             <?php else: ?>
                 <?php foreach ($historico as $registo): ?>
-                    <?php
-                    if ($registo['data_trabalho'] instanceof DateTime) {
-                        $data = $registo['data_trabalho']->format('d/m/Y');
-                    } else {
-                        $ts = strtotime((string) $registo['data_trabalho']);
-                        $data = $ts !== false ? date('d/m/Y', $ts) : htmlspecialchars((string) $registo['data_trabalho']);
-                    }
-                    ?>
+                    <?php $data = format_sqlsrv_date($registo['data_trabalho']); ?>
                     <tr>
                          <td><?php echo htmlspecialchars($registo['nome_rua'], ENT_QUOTES, 'UTF-8'); ?></td>
                          <td><?php echo htmlspecialchars($data, ENT_QUOTES, 'UTF-8'); ?></td>

@@ -123,14 +123,7 @@ $totalComIva = $despesaTotal * (1 + $taxaIva);
                     <tr><td colspan="7" style="text-align:center;">Sem registos para esta viatura.</td></tr>
                 <?php else: ?>
                     <?php foreach ($historico as $registo): ?>
-                        <?php
-                        if ($registo['data_servico'] instanceof DateTime) {
-                            $data = $registo['data_servico']->format('d/m/Y');
-                        } else {
-                            $ts = strtotime((string) $registo['data_servico']);
-                            $data = $ts !== false ? date('d/m/Y', $ts) : htmlspecialchars((string) $registo['data_servico']);
-                        }
-                        ?>
+                        <?php $data = format_sqlsrv_date($registo['data_servico']); ?>
                         <tr>
                             <td><?php echo (int) $registo['id']; ?></td>
                             <td><?php echo htmlspecialchars($data, ENT_QUOTES, 'UTF-8'); ?></td>

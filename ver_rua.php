@@ -33,13 +33,7 @@ if (!sqlsrv_execute($stmt)) {
 $temRegistos = false;
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     $temRegistos = true;
-    if ($row['data_trabalho'] instanceof DateTime) {
-        $data = $row['data_trabalho']->format('d/m/Y');
-    } else {
-        $rawDate = (string) $row['data_trabalho'];
-        $ts = strtotime($rawDate);
-        $data = $ts !== false ? date('d/m/Y', $ts) : $rawDate;
-    }
+    $data = format_sqlsrv_date($row['data_trabalho']);
     echo htmlspecialchars($data, ENT_QUOTES, 'UTF-8') . ' — ' . htmlspecialchars($row['tipo_trabalho'], ENT_QUOTES, 'UTF-8');
     if (!empty($row['observacoes'])) {
         echo ': ' . htmlspecialchars((string) $row['observacoes'], ENT_QUOTES, 'UTF-8');

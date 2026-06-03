@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/security.php';
+require_once __DIR__ . '/app_helpers.php';
 
 // Mostrar erros em ambiente de desenvolvimento para facilitar depuração
 if (!is_production()) {
