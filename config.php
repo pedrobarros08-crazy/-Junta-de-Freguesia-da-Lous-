@@ -14,16 +14,25 @@ if (!extension_loaded('sqlsrv')) {
     die("Erro: A extensão SQLSRV não está instalada. Consulte o README.md para instruções de instalação.");
 }
 
-$serverName = getenv('DB_SERVER') ?: 'JFLVILARINHO\SQLEXPRESS';
-if (!$serverName) {
-    die("Erro: variável de ambiente DB_SERVER não configurada. Consulte o ficheiro .env.example.");
+$serverName = trim((string) getenv('DB_SERVER'));
+$dbName = trim((string) getenv('DB_NAME'));
+$dbUser = trim((string) getenv('DB_USER'));
+$dbPassword = (string) getenv('DB_PASSWORD');
+$dbCharset = trim((string) getenv('DB_CHARSET'));
+
+if ($serverName === '' || $dbName === '' || $dbUser === '' || $dbPassword === '') {
+    die("Erro: variáveis DB_SERVER, DB_NAME, DB_USER e DB_PASSWORD são obrigatórias. Consulte o ficheiro .env.example.");
+}
+
+if ($dbCharset === '') {
+    $dbCharset = 'UTF-8';
 }
 
 $connectionOptions = [
-    "Database"     => getenv('DB_NAME') ?: 'ACCESS APLICAÇÃO',
-    "Uid"          => getenv('DB_USER') ?: 'Aplicação User',
-    "PWD"          => getenv('DB_PASSWORD') ?: 'JFLousan#2026',
-    "CharacterSet" => getenv('DB_CHARSET') ?: 'UTF-8',
+    "Database"     => $dbName,
+    "Uid"          => $dbUser,
+    "PWD"          => $dbPassword,
+    "CharacterSet" => $dbCharset,
 ];
 
 $conn = sqlsrv_connect($serverName, $connectionOptions);
