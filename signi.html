@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestão de Reparações de Frota</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: auto; }
+        .form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .full-width { grid-column: span 2; }
+        .btn-gravar { background-color: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 15px; width: 100%; transition: 0.3s; }
+        .btn-gravar:hover { background-color: #2980b9; }
+        .btn-voltar { background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn-voltar:hover { background-color: #5a6268; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #333; color: white; }
+        tr:hover { background-color: #f9f9f9; }
+        .header-tabela { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+        .msg-sucesso { color: green; font-weight: bold; margin-top: 10px; display: none; }
+        .msg-erro { color: red; font-weight: bold; margin-top: 10px; display: none; }
+        #tituloTabela { font-size: 1.1em; color: #555; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="form-container">
+        <h2>Novo Registo de Reparação</h2>
+        <div class="grid-form">
+            <div>
+                <label>Viatura:</label>
+                <select id="cars" required onchange="carregarHistorico()">
+                    <option value="">Selecione...</option>
+                    <option value="Toyota Dyna 06-53-SM">Toyota Dyna 06-53-SM</option>
+                    <option value="Toyota Dyna 96-98-II">Toyota Dyna 96-98-II</option>
+                    <option value="Mitsubishi 92-DU-20">Mitsubishi 92-DU-20</option>
+                    <option value="Opel 01-77-LR">Opel 01-77-LR</option>
+                    <option value="Hyundai 98-66-ST">Hyundai 98-66-ST</option>
+                    <option value="Renault Clio 42-BH-11">Renault Clio 42-BH-11</option>
+                    <option value="Renault Kangoo 33-BJ-10">Renault Kangoo 33-BJ-10</option>
+                    <option value="Trator Deutz">Trator Deutz</option>
+                    <option value="Dumper Astel">Dumper Astel</option>
+                    <option value="Retroescavadora Case">Retroescavadora Case</option>
+                </select>
+            </div>
+            <div>
+                <label>Data:</label>
+                <input type="date" id="data" required>
+            </div>
+            <div class="full-width">
+                <label>O que foi feito?</label>
+                <input type="text" id="tipoTrabalho" placeholder="Ex: Mudança de óleo" required>
+            </div>
+            <div>
+                <label>Fornecedor:</label>
+                <input type="text" id="nomeFornecedor" required>
+            </div>
+            <div>
+                <label>Custo (€):</label>
+                <input type="number" id="preco" step="0.01" required>
+            </div>
+            <div>
+                <label>KM Atuais:</label>
+                <input type="number" id="kms" required>
+            </div>
+        </div>
+        <button class="btn-gravar" onclick="gravarReparacao()">Gravar Reparação</button>
+        <p class="msg-sucesso" id="msgSucesso">✅ Reparação gravada com sucesso!</p>
+        <p class="msg-erro" id="msgErro"></p>
+    </div>
+
+    <div class="header-tabela">
+        <h2>Histórico de Manutenções</h2>
+        <span id="tituloTabela"></span>
+    </div>
+
+    <table id="tabelaReparacoes">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Intervenção</th>
+                <th>Fornecedor</th>
+                <th>KM</th>
+                <th>Valor</th>
+            </tr>
+        </thead>
+        <tbody id="corpoTabela">
+            <tr><td colspan="5" style="text-align:center;color:#aaa;">Selecione uma viatura para ver o histórico</td></tr>
+        </tbody>
+    </table>
+
+    <button onclick="window.location.href='index.html'" class="btn-voltar">Voltar ao Menu</button>
+</div>
+
+<script>
+function gravarReparacao() {
+    const viatura    = document.getElementById('cars').value;
+    const data       = document.getElementById('data').value;
+    const trabalho   = document.getElementById('tipoTrabalho').value;
+    const fornecedor = document.getElementById('nomeFornecedor').value;
+    const preco      = document.getElementById('preco').value;
+    const kms        = document.getElementById('kms').value;
+
+    if (!viatura || !data || !trabalho || !fornecedor || !preco || !kms) {
+        alert('Preencha todos os campos.');
+        return;
+    }
+
+    const dados = new FormData();
+    dados.append('acao', 'gravar');
+    dados.append('viatura', viatura);
+    dados.append('data', data);
+    dados.append('trabalho', trabalho);
+    dados.append('fornecedor', fornecedor);
+    dados.append('preco', preco);
+    dados.append('kms', kms);
+
+    fetch('reparacoes.php', { method: 'POST', body: dados })
+        .then(r => r.json())
+        .then(json => {
+            if (json.sucesso) {
+                document.getElementById('msgSucesso').style.display = 'block';
+                document.getElementById('msgErro').style.display = 'none';
+                setTimeout(() => document.getElementById('msgSucesso').style.display = 'none', 3000);
+                // limpar campos (manter viatura)
+                document.getElementById('data').value = '';
+                document.getElementById('tipoTrabalho').value = '';
+                document.getElementById('nomeFornecedor').value = '';
+                document.getElementById('preco').value = '';
+                document.getElementById('kms').value = '';
+                carregarHistorico();
+            } else {
+                const el = document.getElementById('msgErro');
+                el.innerText = '❌ Erro: ' + json.erro;
+                el.style.display = 'block';
+            }
+        })
+        .catch(() => {
+            const el = document.getElementById('msgErro');
+            el.innerText = '❌ Erro de ligação ao servidor.';
+            el.style.display = 'block';
+        });
+}
+
+function carregarHistorico() {
+    const viatura = document.getElementById('cars').value;
+    const corpo   = document.getElementById('corpoTabela');
+    const titulo  = document.getElementById('tituloTabela');
+
+    if (!viatura) {
+        corpo.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;">Selecione uma viatura</td></tr>';
+        titulo.innerText = '';
+        return;
+    }
+
+    titulo.innerText = viatura;
+    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;">A carregar...</td></tr>';
+
+    fetch('reparacoes.php?acao=carregar&viatura=' + encodeURIComponent(viatura))
+        .then(r => r.json())
+        .then(dados => {
+            if (dados.erro) {
+                corpo.innerHTML = '<tr><td colspan="5" style="color:red;">Erro: ' + dados.erro + '</td></tr>';
+                return;
+            }
+            if (dados.length === 0) {
+                corpo.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;">Sem registos</td></tr>';
+                return;
+            }
+            corpo.innerHTML = '';
+            dados.forEach(r => {
+                const data = r['Data'] ? r['Data'].split(' ')[0].split('-').reverse().join('/') : '-';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${r['Data'] || '-'}</td>
+                    <td>${r['Intervenção'] || '-'}</td>
+                    <td>${r['Fornecedor'] || '-'}</td>
+                    <td>${Number(r['KM']).toLocaleString('pt-PT')} km</td>
+                    <td>${Number(r['Valor']).toFixed(2)} €</td>
+                `;
+                corpo.appendChild(tr);
+            });
+        })
+        .catch(() => {
+            corpo.innerHTML = '<tr><td colspan="5" style="color:red;">Erro de ligação.</td></tr>';
+        });
+}
+</script>
+</body>
+</html>
