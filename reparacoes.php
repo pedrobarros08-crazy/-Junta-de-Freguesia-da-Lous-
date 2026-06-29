@@ -17,7 +17,7 @@ $mapeamento = [
     "Renault Kangoo 33-BJ-10" => "dbo.Manutenção Renault Kangoo",
     "Trator Deutz"            => "dbo.Manutenção Trator Deutz",
     "Dumper Astel"            => "dbo.Manutenção Dumper VN Astel",
-    "Retroescavadora Case"    => "dbo.Manutenção Trator Case"
+    "Retroescavadora Case"    => "dbo.Manutenção Retroescavadora Case"
 ];
 
 $conn = odbc_connect("Driver={ODBC Driver 17 for SQL Server};Server=$servidor;Database=$baseDados;", $utilizador, $password);
