@@ -2,7 +2,7 @@
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 
-$servidor   = "JFLVILARINHO\SQLEXPRESS";
+$servidor   = "JFLVILARINHO\\SQLEXPRESS";
 $baseDados  = "ACESS APLICAÇÃO";
 $utilizador = "Aplicação User";
 $password   = "JFLousan#2026";
@@ -26,11 +26,12 @@ if (!$conn) { echo json_encode(["erro" => odbc_errormsg()]); exit; }
 $acao = $_GET['acao'] ?? $_POST['acao'] ?? '';
 
 if ($acao === 'gravar') {
-    $data       = $_POST['Data']       ?? '';
-    $trabalho   = $_POST['Intervenção']   ?? '';
-    $fornecedor = $_POST['Fornecedor'] ?? '';
-    $kms        = $_POST['KM']        ?? '';
-    $preco      = $_POST['Valor']      ?? '';
+    $viatura    = $_POST['viatura']    ?? '';
+    $data       = $_POST['data']       ?? '';
+    $trabalho   = $_POST['trabalho']   ?? '';
+    $fornecedor = $_POST['fornecedor'] ?? '';
+    $kms        = $_POST['kms']        ?? '';
+    $preco      = $_POST['preco']      ?? '';
 
     if (!isset($mapeamento[$viatura])) { echo json_encode(["erro" => "Viatura inválida"]); exit; }
 

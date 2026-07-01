@@ -2,7 +2,7 @@
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 
-$servidor   = "JFLVILARINHO\SQLEXPRESS";
+$servidor   = "JFLVILARINHO\\SQLEXPRESS";
 $baseDados  = "ACESS APLICAÇÃO";
 $utilizador = "Aplicação User";
 $password   = "JFLousan#2026";
@@ -65,7 +65,7 @@ if ($acao === 'gravar') {
     if (!isset($mapeamento[$localidade])) { echo json_encode(["erro" => "Localidade inválida"]); exit; }
 
     $tabela = $mapeamento[$localidade];
-    $res    = odbc_exec($conn, "SELECT [Trabalhos efectuados] AS Trabalho, Ruas, Obs, Data FROM dbo.[{$tabela}] ORDER BY Data DESC");
+    $res    = odbc_exec($conn, "SELECT [Trabalhos efectuados], Ruas, Obs, Data FROM dbo.[{$tabela}] ORDER BY Data DESC");
     if (!$res) { echo json_encode(["erro" => odbc_errormsg()]); exit; }
 
     $rows = [];
